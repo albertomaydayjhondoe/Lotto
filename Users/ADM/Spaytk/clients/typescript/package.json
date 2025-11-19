@@ -1,9 +1,0 @@
-{
-  "name": "orquestador-typescript-client",
-  "version": "0.0.0",
-  "private": true,
-  "description": "Minimal TypeScript client scaffold for Orquestador API (placeholder).",
-  "devDependencies": {
-    "openapi-typescript-codegen": "^0.29.0"
-  }
-}

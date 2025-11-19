@@ -1,4 +1,0 @@
-# Minimal requirements for the generated-style Python client
-# If you later run `openapi-python-client` this file can be updated/overwritten.
-
-httpx>=0.23.0
