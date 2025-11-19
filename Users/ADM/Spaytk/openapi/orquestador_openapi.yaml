@@ -1,0 +1,278 @@
+openapi: 3.0.3
+info:
+  title: Orquestador API
+  version: '1.0.0'
+  description: API for the Orquestador service (music marketing orchestration).
+servers:
+  - url: https://api.example.com
+
+paths:
+  /upload:
+    post:
+      summary: Upload a video
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                metadata:
+                  type: string
+      responses:
+        '201':
+          description: Uploaded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VideoUploadResponse'
+
+  /jobs:
+    post:
+      summary: Create a job
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobCreate'
+      responses:
+        '201':
+          description: Job created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+    get:
+      summary: List jobs
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Job'
+
+  /jobs/{job_id}:
+    parameters:
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      summary: Get a job
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+
+  /clips:
+    post:
+      summary: Create a clip
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClipCreate'
+      responses:
+        '201':
+          description: Clip created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Clip'
+
+  /clips/{clip_id}/variants:
+    parameters:
+      - name: clip_id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      summary: List clip variants
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ClipVariant'
+
+  /confirm_publish:
+    post:
+      summary: Confirm publish of a clip
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmPublishRequest'
+      responses:
+        '200':
+          description: Confirmed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfirmPublishResponse'
+
+  /webhook/instagram:
+    post:
+      summary: Instagram webhook endpoint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Received
+
+  /campaigns:
+    post:
+      summary: Create a campaign
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CampaignCreate'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Campaign'
+
+  /rules:
+    post:
+      summary: Create platform rules
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlatformRules'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformRules'
+
+components:
+  schemas:
+    VideoUploadResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        url:
+          type: string
+
+    JobCreate:
+      type: object
+      properties:
+        clip_id:
+          type: string
+        type:
+          type: string
+      required: [clip_id, type]
+
+    Job:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+        clip_id:
+          type: string
+
+    ClipCreate:
+      type: object
+      properties:
+        title:
+          type: string
+        source_url:
+          type: string
+      required: [title]
+
+    Clip:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        variants:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClipVariant'
+
+    ClipVariant:
+      type: object
+      properties:
+        id:
+          type: string
+        format:
+          type: string
+        url:
+          type: string
+
+    ConfirmPublishRequest:
+      type: object
+      properties:
+        clip_id:
+          type: string
+        platform:
+          type: string
+      required: [clip_id, platform]
+
+    ConfirmPublishResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+
+    CampaignCreate:
+      type: object
+      properties:
+        name:
+          type: string
+        clips:
+          type: array
+          items:
+            type: string
+      required: [name]
+
+    Campaign:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+
+    PlatformRules:
+      type: object
+      properties:
+        platform:
+          type: string
+        settings:
+          type: object
