@@ -113,6 +113,17 @@ async def run_cut_analysis(job: Job, db: AsyncSession) -> Dict[str, Any]:
             job_id=job.id
         )
         
+        # Evaluate clip with Rule Engine (default to Instagram)
+        try:
+            from app.rules_engine import RuleEngine
+            engine = RuleEngine()
+            score = await engine.evaluate_clip(db, clip.id, "instagram")
+            # Update clip visual_score with evaluated score
+            clip.visual_score = score
+        except Exception:
+            # Silently fail if evaluation fails (clip still created)
+            pass
+        
         clips_created.append({
             "clip_id": str(clip.id),
             "start_ms": start_ms,

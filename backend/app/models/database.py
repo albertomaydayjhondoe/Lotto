@@ -179,3 +179,13 @@ class PlatformRule(Base):
     status = Column(Enum(RuleStatus), default=RuleStatus.CANDIDATE, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+# Rule Engine Weights
+class RuleEngineWeights(Base):
+    """Rule engine weights model."""
+    __tablename__ = "rules_engine_weights"
+    
+    platform = Column(String(50), primary_key=True)
+    weights = Column(JSON, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
