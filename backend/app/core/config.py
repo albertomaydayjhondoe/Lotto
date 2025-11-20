@@ -23,7 +23,8 @@ class Settings(BaseSettings):
     
     # File Upload
     MAX_UPLOAD_SIZE: int = 500 * 1024 * 1024  # 500MB
-    UPLOAD_DIR: str = "/tmp/uploads"
+    UPLOAD_DIR: str = "/tmp/uploads"  # Deprecated, use VIDEO_STORAGE_DIR
+    VIDEO_STORAGE_DIR: str = "storage/videos"  # Base directory for video storage
     
     # JWT
     SECRET_KEY: str = "your-secret-key-change-in-production"
