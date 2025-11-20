@@ -7,11 +7,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.database import Job
 from app.worker.handlers import run_cut_analysis
+from app.e2b.dispatcher import dispatch_e2b_job, should_use_e2b_dispatcher
 
 
 # Dispatch table: job_type -> handler function
 DISPATCH_TABLE: Dict[str, Callable] = {
     "cut_analysis": run_cut_analysis,
+    "cut_analysis_e2b": dispatch_e2b_job,  # E2B simulation
     # Add more handlers here as they're implemented:
     # "generate_variants": run_generate_variants,
     # "publish_to_platform": run_publish_to_platform,

@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
 from app.api import upload, jobs, clips, confirm_publish, webhooks, campaigns, rules, debug, rule_engine, campaigns_orchestrator
+from app.e2b import api as e2b_api
 from app.core.config import settings
 from app.core.database import init_db
 
@@ -51,6 +52,9 @@ app.include_router(rule_engine.router, prefix="/rules", tags=["rule_engine"])
 
 # Campaigns Orchestrator endpoints
 app.include_router(campaigns_orchestrator.router, tags=["campaigns_orchestrator"])
+
+# E2B Sandbox Simulation endpoints
+app.include_router(e2b_api.router, tags=["e2b_simulation"])
 
 # Debug endpoints (DEVELOPMENT ONLY)
 # WARNING: In production, these endpoints should be protected with authentication
