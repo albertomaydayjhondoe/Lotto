@@ -6,6 +6,7 @@ from uuid import uuid4
 from sqlalchemy import Column, String, Integer, Float, DateTime, JSON, ForeignKey, Text, Enum
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
+from sqlalchemy.schema import UniqueConstraint
 import enum
 
 from app.core.database import Base
@@ -189,3 +190,25 @@ class RuleEngineWeights(Base):
     platform = Column(String(50), primary_key=True)
     weights = Column(JSON, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+
+# Best Clip Decisions (Campaigns Orchestrator)
+class BestClipDecisionModel(Base):
+    """Best clip decision model for campaigns orchestrator."""
+    __tablename__ = "best_clip_decisions"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    video_asset_id = Column(UUID(as_uuid=True), ForeignKey("video_assets.id", ondelete="CASCADE"), nullable=False)
+    platform = Column(String(50), nullable=False)
+    clip_id = Column(UUID(as_uuid=True), ForeignKey("clips.id", ondelete="CASCADE"), nullable=False)
+    score = Column(Float, nullable=False)
+    decided_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    
+    # Unique constraint on video_asset_id + platform
+    __table_args__ = (
+        UniqueConstraint('video_asset_id', 'platform', name='uq_video_asset_platform'),
+    )
+    
+    # Relationships
+    video_asset = relationship("VideoAsset", backref="best_clip_decisions")
+    clip = relationship("Clip", backref="best_clip_decisions")
