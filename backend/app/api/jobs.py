@@ -13,6 +13,8 @@ from uuid import uuid4, UUID
 from app.models.schemas import Job as JobSchema, JobCreate
 from app.models.database import Job, JobStatus
 from app.core.database import get_db
+from app.services.job_worker import run_job
+from app.worker import process_single_job
 
 router = APIRouter()
 
@@ -113,3 +115,69 @@ async def get_job(
         )
     
     return JobSchema.model_validate(job)
+
+
+@router.post("/jobs/process")
+async def process_next_job(
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Process the next available job from the queue (DEV ONLY).
+    
+    This endpoint dequeues and processes a single PENDING job using the
+    job runner architecture. It does NOT use an infinite loop.
+    
+    Useful for:
+    - Development and testing
+    - Manual job processing
+    - Debugging job handlers
+    
+    Returns:
+        {
+            "processed": bool,
+            "job_id": str (if processed),
+            "job_type": str (if processed),
+            "status": str,
+            "result": dict,
+            "processing_time_ms": int,
+            "error": Optional[str]
+        }
+    """
+    result = await process_single_job(db)
+    return result
+
+
+@router.post("/jobs/{id}/process")
+async def process_job_by_id(
+    id: UUID,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Process a specific job by ID (DEPRECATED - use POST /jobs/process).
+    
+    This endpoint uses the legacy job_worker service.
+    For new code, use POST /jobs/process which uses the queue system.
+    
+    Args:
+        id: Job ID
+        db: Database session
+        
+    Returns:
+        Processing summary with status, clips generated, and timing
+    """
+    # Check if job exists
+    result = await db.execute(
+        select(Job).where(Job.id == id)
+    )
+    job = result.scalar_one_or_none()
+    
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="job not found"
+        )
+    
+    # Execute job processing (legacy method)
+    summary = await run_job(str(id), db)
+    
+    return summary

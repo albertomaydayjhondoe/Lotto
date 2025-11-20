@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
-from app.api import upload, jobs, clips, confirm_publish, webhooks, campaigns, rules
+from app.api import upload, jobs, clips, confirm_publish, webhooks, campaigns, rules, debug
 from app.core.config import settings
 from app.core.database import init_db
 
@@ -45,6 +45,12 @@ app.include_router(confirm_publish.router, tags=["confirm_publish"])
 app.include_router(webhooks.router, prefix="/webhook", tags=["webhooks"])
 app.include_router(campaigns.router, tags=["campaigns"])
 app.include_router(rules.router, tags=["rules"])
+
+# Debug endpoints (DEVELOPMENT ONLY)
+# WARNING: In production, these endpoints should be protected with authentication
+# or disabled by setting DEBUG_ENDPOINTS_ENABLED=False in config
+if settings.DEBUG_ENDPOINTS_ENABLED:
+    app.include_router(debug.router, prefix="/debug", tags=["debug"])
 
 
 @app.get("/")

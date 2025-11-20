@@ -13,6 +13,9 @@ class Settings(BaseSettings):
     DESCRIPTION: str = "API para el Orquestador del Sistema Maestro de IA"
     
     # Database
+    # Development: SQLite (sin Docker)
+    # DATABASE_URL: str = "sqlite+aiosqlite:///./stakazo.db"
+    # Production: PostgreSQL
     DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@postgres:5432/stakazo_db"
     
     # CORS
@@ -30,6 +33,14 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "your-secret-key-change-in-production"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    
+    # Worker Configuration
+    WORKER_POLL_INTERVAL: int = 2  # seconds between job checks
+    MAX_JOB_RETRIES: int = 3  # maximum retry attempts per job
+    WORKER_ENABLED: bool = False  # enable background worker loop
+    
+    # Debug Configuration
+    DEBUG_ENDPOINTS_ENABLED: bool = True  # enable /debug endpoints (disable in production)
     
     class Config:
         case_sensitive = True

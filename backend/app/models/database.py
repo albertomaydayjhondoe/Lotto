@@ -15,6 +15,7 @@ class JobStatus(str, enum.Enum):
     """Job status enumeration."""
     PENDING = "pending"
     PROCESSING = "processing"
+    RETRY = "retry"
     COMPLETED = "completed"
     FAILED = "failed"
 
