@@ -13,6 +13,7 @@ from app.worker.queue import dequeue_job
 from app.worker.dispatcher import dispatch_job, is_job_type_supported
 from app.core.config import settings
 from app.core.logging import get_logger
+from app.ledger import log_job_event
 
 logger = get_logger(__name__)
 
@@ -55,6 +56,14 @@ async def process_single_job(db: AsyncSession) -> Optional[Dict[str, Any]]:
     
     logger.info("Starting job processing", extra={"job_id": job_id, "job_type": job_type})
     
+    # Log job processing started to ledger
+    await log_job_event(
+        db=db,
+        job_id=job.id,
+        event_type="job_processing_started",
+        metadata={"job_type": job_type}
+    )
+    
     try:
         # Check if handler exists
         if not is_job_type_supported(job_type):
@@ -68,6 +77,17 @@ async def process_single_job(db: AsyncSession) -> Optional[Dict[str, Any]]:
         job.result = result
         job.error_message = None
         job.updated_at = datetime.utcnow()
+        
+        # Log job completion to ledger
+        await log_job_event(
+            db=db,
+            job_id=job.id,
+            event_type="job_processing_completed",
+            metadata={
+                "job_type": job_type,
+                "clips_created": result.get("clips_created", 0) if isinstance(result, dict) else None
+            }
+        )
         
         await db.commit()
         
@@ -103,6 +123,19 @@ async def process_single_job(db: AsyncSession) -> Optional[Dict[str, Any]]:
         job.status = JobStatus.FAILED
         job.error_message = str(e)
         job.updated_at = datetime.utcnow()
+        
+        # Log job failure to ledger
+        await log_job_event(
+            db=db,
+            job_id=job.id,
+            event_type="job_processing_failed",
+            metadata={
+                "job_type": job_type,
+                "error": str(e),
+                "error_type": "unknown_job_type"
+            },
+            severity="ERROR"
+        )
         
         await db.commit()
         

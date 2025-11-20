@@ -15,6 +15,7 @@ from app.models.schemas import VideoUploadResponse
 from app.models.database import VideoAsset, Job, JobStatus
 from app.core.database import get_db
 from app.core.config import settings
+from app.ledger import log_event, log_job_event
 
 router = APIRouter()
 
@@ -150,6 +151,27 @@ async def upload_video(
         )
         
         db.add(job)
+        
+        # Log events to ledger
+        await log_event(
+            db=db,
+            event_type="video_uploaded",
+            entity_type="video_asset",
+            entity_id=str(video_asset.id),
+            metadata={
+                "filename": file.filename,
+                "size": file_size,
+                "content_type": file.content_type,
+                "title": title
+            }
+        )
+        
+        await log_job_event(
+            db=db,
+            job_id=job.id,
+            event_type="job_created",
+            metadata={"job_type": "cut_analysis", "reason": "initial_cut_from_upload"}
+        )
         
         # 11. Commit transaction
         await db.commit()

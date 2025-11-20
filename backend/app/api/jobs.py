@@ -54,6 +54,18 @@ async def create_job(
     )
     
     db.add(job)
+    
+    # Log job creation to ledger
+    await log_job_event(
+        db=db,
+        job_id=job.id,
+        event_type="job_created",
+        metadata={
+            "job_type": job_data.job_type,
+            "has_params": job_data.params is not None
+        }
+    )
+    
     await db.commit()
     await db.refresh(job)
     

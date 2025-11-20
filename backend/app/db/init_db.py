@@ -13,6 +13,7 @@ from app.models.database import (
     VideoAsset, Clip, Job, Campaign, PlatformRule,
     JobStatus, ClipStatus, CampaignStatus, RuleStatus
 )
+from app.ledger.models import LedgerEvent, EventSeverity
 
 
 async def init_database():

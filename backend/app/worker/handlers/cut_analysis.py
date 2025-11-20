@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.models.database import Job, VideoAsset, Clip, ClipStatus
+from app.ledger import log_clip_event
 
 
 async def run_cut_analysis(job: Job, db: AsyncSession) -> Dict[str, Any]:
@@ -94,6 +95,24 @@ async def run_cut_analysis(job: Job, db: AsyncSession) -> Dict[str, Any]:
         )
         
         db.add(clip)
+        
+        # Log clip creation to ledger
+        await log_clip_event(
+            db=db,
+            clip_id=clip.id,
+            event_type="clip_created",
+            metadata={
+                "video_asset_id": str(video_asset.id),
+                "start_ms": start_ms,
+                "end_ms": end_ms,
+                "duration_ms": segment_duration,
+                "visual_score": visual_score,
+                "clip_index": i,
+                "total_clips": num_clips
+            },
+            job_id=job.id
+        )
+        
         clips_created.append({
             "clip_id": str(clip.id),
             "start_ms": start_ms,

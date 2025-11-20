@@ -13,6 +13,8 @@ from typing import Dict, Any
 from app.core.database import get_db
 from app.models.database import Job, JobStatus, Clip, ClipStatus, VideoAsset
 from app.core.logging import get_logger
+from app.ledger import get_recent_events, get_total_events
+from app.ledger.models import LedgerEvent
 
 router = APIRouter()
 logger = get_logger(__name__)
@@ -169,6 +171,90 @@ async def health_check(
         
     except Exception as e:
         error_msg = f"Database health check failed: {str(e)}"
+        logger.error(error_msg, extra={"error": str(e)})
+        
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=error_msg
+        )
+
+
+@router.get("/ledger/recent")
+async def get_ledger_recent(
+    limit: int = 50,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Get recent ledger events.
+    
+    Returns the most recent system events from the ledger in descending order
+    (newest first). Useful for monitoring, debugging, and understanding system
+    activity.
+    
+    Query Parameters:
+        limit: Number of events to return (default: 50, max: 500)
+        
+    Returns:
+        {
+            "events": [
+                {
+                    "id": "uuid",
+                    "timestamp": "2025-11-20T10:30:00Z",
+                    "event_type": "clip_created",
+                    "entity_type": "clip",
+                    "entity_id": "uuid",
+                    "metadata": {...},
+                    "severity": "INFO",
+                    "worker_id": null,
+                    "job_id": "uuid",
+                    "clip_id": "uuid"
+                },
+                ...
+            ],
+            "total": 150,
+            "limit": 50
+        }
+    """
+    try:
+        # Validate and cap limit
+        limit = min(max(1, limit), 500)
+        
+        # Get recent events
+        events = await get_recent_events(db, limit=limit)
+        
+        # Get total count
+        total = await get_total_events(db)
+        
+        # Format response
+        events_data = [
+            {
+                "id": str(event.id),
+                "timestamp": event.timestamp.isoformat() if event.timestamp else None,
+                "event_type": event.event_type,
+                "entity_type": event.entity_type,
+                "entity_id": event.entity_id,
+                "metadata": event.event_data or {},  # Return as 'metadata' in API
+                "severity": event.severity.value if event.severity else "INFO",
+                "worker_id": event.worker_id,
+                "job_id": str(event.job_id) if event.job_id else None,
+                "clip_id": str(event.clip_id) if event.clip_id else None
+            }
+            for event in events
+        ]
+        
+        logger.info(
+            f"Retrieved {len(events)} ledger events",
+            extra={"count": len(events), "limit": limit, "total": total}
+        )
+        
+        return {
+            "events": events_data,
+            "total": total,
+            "limit": limit
+        }
+        
+    except Exception as e:
+        error_msg = f"Failed to retrieve ledger events: {str(e)}"
         logger.error(error_msg, extra={"error": str(e)})
         
         raise HTTPException(
