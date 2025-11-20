@@ -9,6 +9,7 @@ from contextlib import asynccontextmanager
 from app.api import upload, jobs, clips, confirm_publish, webhooks, campaigns, rules, debug, rule_engine, campaigns_orchestrator
 from app.e2b import api as e2b_api
 from app.publishing_engine import router as publishing_router
+from app.publishing_integrations.router import router as providers_router
 from app.core.config import settings
 from app.core.database import init_db
 
@@ -59,6 +60,9 @@ app.include_router(e2b_api.router, tags=["e2b_simulation"])
 
 # Publishing Engine endpoints
 app.include_router(publishing_router, prefix="/publishing", tags=["publishing"])
+
+# Publishing Integrations endpoints (Step 3)
+app.include_router(providers_router, prefix="/publishing", tags=["providers"])
 
 # Debug endpoints (DEVELOPMENT ONLY)
 # WARNING: In production, these endpoints should be protected with authentication

@@ -10,6 +10,9 @@ from app.publishing_engine.models import PublishRequest, PublishResult
 from app.publishing_engine.simulator import get_simulator
 from app.ledger import log_event
 
+# TODO: Replace simulators with real API clients when credentials available
+from app.publishing_integrations import get_provider_client  # noqa: F401
+
 
 async def publish_clip(
     db: AsyncSession,
