@@ -4,21 +4,38 @@ API para el Orquestador del Sistema Maestro de IA. Maneja uploads de videos, job
 
 ## 🚀 Inicio Rápido
 
-### 1. Clonar e Iniciar Servicios
+### Opción A: Con Docker (Recomendado)
 
 ```bash
-# Iniciar PostgreSQL y Backend
-make dev
+# Iniciar PostgreSQL en Docker y backend localmente
+./dev-start.sh
 
-# O iniciar solo la base de datos
-make db
+# O con make
+make dev
+```
+
+**Acceder a:**
+- **API Docs**: http://localhost:8000/docs
+- **pgAdmin**: http://localhost:5050 (admin@stakazo.local / admin)
+
+### Opción B: Desarrollo con SQLite (Fallback)
+
+```bash
+# Si Docker no está disponible, el backend usa SQLite automáticamente
+cd backend
+source ../venv/bin/activate
+uvicorn main:app --reload
 ```
 
 ### 2. Inicializar Base de Datos
 
 ```bash
-# Crear schema y datos de ejemplo
-make init-db
+# Aplicar migraciones
+cd backend
+alembic upgrade head
+
+# O con make
+make migrate
 ```
 
 ### 3. Explorar la API
@@ -26,6 +43,7 @@ make init-db
 - **API Docs (Swagger)**: http://localhost:8000/docs
 - **ReDoc**: http://localhost:8000/redoc
 - **Health Check**: http://localhost:8000/health
+- **Debug Endpoints**: http://localhost:8000/debug/
 
 ## 📚 Comandos Disponibles
 
@@ -126,24 +144,43 @@ stakazo/
 
 ### Variables de Entorno
 
-Crear archivo `.env` en `backend/`:
+El archivo `.env` se genera automáticamente desde `.env.example`. Las variables principales:
 
 ```bash
+# Database Configuration
+# PostgreSQL (recomendado)
 DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/stakazo_db
-SECRET_KEY=your-secret-key-change-in-production
-UPLOAD_DIR=/tmp/uploads
-MAX_UPLOAD_SIZE=524288000
+# SQLite (fallback para desarrollo sin Docker)
+# DATABASE_URL=sqlite+aiosqlite:///./stakazo.db
+
+# Security
+SECRET_KEY=dev-secret-key-change-in-production
+
+# Worker Configuration  
+WORKER_ENABLED=false
+WORKER_POLL_INTERVAL=2
+MAX_JOB_RETRIES=3
+
+# Storage
+VIDEO_STORAGE_DIR=storage/videos
+
+# Debug (disable in production)
+DEBUG_ENDPOINTS_ENABLED=true
 ```
 
 ### Database Connection
 
+El backend detecta automáticamente el entorno:
+
 ```python
-# Local (host)
+# Con Docker: Lee DATABASE_URL desde .env
 DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/stakazo_db
 
-# Docker (container to container)
-DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/stakazo_db
+# Sin Docker: Fallback a SQLite
+DATABASE_URL=sqlite+aiosqlite:///./stakazo.db
 ```
+
+**Nota**: PostgreSQL requiere Docker. Si Docker no está disponible, el sistema usa SQLite automáticamente.
 
 ## 🧪 Testing
 
@@ -157,15 +194,39 @@ cd backend && pytest tests/test_jobs.py -v
 
 ## 🐳 Docker
 
-### Servicios
+### Arquitectura
 
-- **postgres**: PostgreSQL 15 (puerto 5432)
-- **backend**: FastAPI con hot-reload (puerto 8000)
+- **PostgreSQL**: Corre en Docker (puerto 5432)
+- **Backend**: Corre localmente para desarrollo rápido
+- **pgAdmin**: Opcional, interfaz web para gestionar PostgreSQL (puerto 5050)
+
+### Scripts de Desarrollo
+
+```bash
+# Iniciar servicios
+./dev-start.sh         # Inicia PostgreSQL + Backend con migraciones
+
+# Detener servicios  
+./dev-stop.sh          # Para todos los contenedores
+```
+
+### Servicios Docker
+
+```bash
+# Ver servicios activos
+docker compose ps
+
+# Logs de PostgreSQL
+docker compose logs postgres -f
+
+# Acceder a psql
+docker compose exec postgres psql -U postgres -d stakazo_db
+```
 
 ### Volúmenes
 
-- `postgres_data`: Datos de PostgreSQL
-- `uploads_data`: Archivos subidos
+- `postgres_data`: Datos persistentes de PostgreSQL
+- `pgadmin_data`: Configuración de pgAdmin
 
 ## 🔄 Migrations con Alembic
 
@@ -185,32 +246,62 @@ cd backend && alembic downgrade -1
 
 ## 🧑‍💻 Desarrollo
 
+### Filosofía de Desarrollo
+
+El proyecto usa un enfoque híbrido:
+- **PostgreSQL en Docker**: Base de datos consistente y fácil de gestionar
+- **Backend local**: Desarrollo rápido con hot-reload sin overhead de Docker
+- **SQLite fallback**: Desarrollo sin dependencias cuando Docker no está disponible
+
+### Setup Inicial
+
+```bash
+# 1. Crear entorno virtual
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# o
+venv\Scripts\activate     # Windows
+
+# 2. Instalar dependencias
+pip install -r backend/requirements.txt
+
+# 3. Configurar variables de entorno
+cd backend
+cp .env.example .env
+
+# 4. Iniciar desarrollo
+cd ..
+./dev-start.sh
+```
+
+### Flujo de Trabajo Diario
+
+```bash
+# Iniciar servicios
+./dev-start.sh
+
+# El script automáticamente:
+# 1. Inicia PostgreSQL en Docker (si está disponible)
+# 2. Espera a que esté listo
+# 3. Ejecuta migraciones
+# 4. Inicia backend con hot-reload
+
+# Detener al finalizar
+Ctrl+C                    # Para el backend
+./dev-stop.sh            # Para PostgreSQL
+```
+
 ### Dev Container (Codespaces)
 
 El proyecto está configurado con Dev Container que incluye:
 
 - Python 3.11
-- Node 20
+- Node 20  
 - Docker in Docker
 - Extensiones VS Code: Python, FastAPI, Docker, YAML
 - Auto-instalación de dependencias al crear el Codespace
 
-### Desarrollo Local
-
-```bash
-# 1. Instalar dependencias
-pip install -r requirements.txt
-pip install -r backend/requirements.txt
-
-# 2. Iniciar PostgreSQL
-make db
-
-# 3. Inicializar BD
-make init-db
-
-# 4. Iniciar backend en modo dev
-make api
-```
+**Limitación en Codespaces**: Docker puede no estar disponible. El sistema detecta esto y usa SQLite automáticamente.
 
 ## 📦 Clientes Generados
 

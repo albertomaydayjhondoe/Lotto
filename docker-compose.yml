@@ -1,3 +1,7 @@
+# Docker Compose for Stakazo Development Environment
+# Run PostgreSQL in Docker, backend runs locally for faster development
+# Usage: docker compose up -d
+
 services:
   postgres:
     image: postgres:15-alpine
@@ -16,26 +20,22 @@ services:
       timeout: 5s
       retries: 5
 
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: stakazo_backend
+  # pgAdmin for database management (optional)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: stakazo_pgadmin
     environment:
-      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/stakazo_db
-      PYTHONUNBUFFERED: 1
-      UPLOAD_DIR: /app/uploads
+      PGADMIN_DEFAULT_EMAIL: admin@stakazo.local
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
     ports:
-      - "8000:8000"
+      - "5050:80"
     volumes:
-      - ./backend:/app
-      - uploads_data:/app/uploads
+      - pgadmin_data:/var/lib/pgadmin
     depends_on:
-      postgres:
-        condition: service_healthy
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+      - postgres
 
 volumes:
   postgres_data:
-  uploads_data:
+  pgadmin_data:
 

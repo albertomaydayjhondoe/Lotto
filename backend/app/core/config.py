@@ -13,10 +13,9 @@ class Settings(BaseSettings):
     DESCRIPTION: str = "API para el Orquestador del Sistema Maestro de IA"
     
     # Database
-    # Development: SQLite (sin Docker)
-    # DATABASE_URL: str = "sqlite+aiosqlite:///./stakazo.db"
-    # Production: PostgreSQL
-    DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@postgres:5432/stakazo_db"
+    # Development: SQLite (fallback) or PostgreSQL (recommended)
+    # Production: PostgreSQL (via environment variable)
+    DATABASE_URL: str = "sqlite+aiosqlite:///./stakazo.db"
     
     # CORS
     BACKEND_CORS_ORIGINS: List[str] = ["*"]
@@ -30,7 +29,7 @@ class Settings(BaseSettings):
     VIDEO_STORAGE_DIR: str = "storage/videos"  # Base directory for video storage
     
     # JWT
-    SECRET_KEY: str = "your-secret-key-change-in-production"
+    SECRET_KEY: str = "dev-secret-key-change-in-production"  # Override via env var
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     
