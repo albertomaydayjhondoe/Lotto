@@ -263,7 +263,22 @@ async def get_scheduled_logs_for_clip(
     result = await db.execute(query)
     logs = result.scalars().all()
     
-    return [PublishLogScheduledInfo.model_validate(log) for log in logs]
+    return [
+        PublishLogScheduledInfo(
+            id=str(log.id),
+            clip_id=str(log.clip_id),
+            platform=log.platform,
+            social_account_id=str(log.social_account_id),
+            status=log.status,
+            schedule_type=log.schedule_type,
+            scheduled_for=log.scheduled_for,
+            scheduled_window_end=log.scheduled_window_end,
+            scheduled_by=log.scheduled_by,
+            created_at=log.created_at,
+            updated_at=log.updated_at
+        )
+        for log in logs
+    ]
 
 
 async def scheduler_tick(
