@@ -10,6 +10,9 @@ from app.api import upload, jobs, clips, confirm_publish, webhooks, campaigns, r
 from app.e2b import api as e2b_api
 from app.publishing_engine import router as publishing_router
 from app.publishing_integrations.router import router as providers_router
+from app.publishing_worker.controller import router as worker_router
+from app.publishing_webhooks.router import router as webhooks_router
+from app.publishing_reconciliation.router import router as reconciliation_router
 from app.core.config import settings
 from app.core.database import init_db
 
@@ -63,6 +66,15 @@ app.include_router(publishing_router, prefix="/publishing", tags=["publishing"])
 
 # Publishing Integrations endpoints (Step 3)
 app.include_router(providers_router, prefix="/publishing", tags=["providers"])
+
+# Publishing Worker endpoints (Step 4.2)
+app.include_router(worker_router, prefix="/publishing", tags=["worker"])
+
+# Publishing Webhooks endpoints (Step 4.3)
+app.include_router(webhooks_router, prefix="/publishing", tags=["webhooks"])
+
+# Publishing Reconciliation endpoints (Step 4.3)
+app.include_router(reconciliation_router, prefix="/publishing", tags=["reconciliation"])
 
 # Debug endpoints (DEVELOPMENT ONLY)
 # WARNING: In production, these endpoints should be protected with authentication

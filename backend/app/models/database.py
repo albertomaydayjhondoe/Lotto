@@ -249,12 +249,18 @@ class PublishLogModel(Base):
     clip_id = Column(UUID(as_uuid=True), ForeignKey("clips.id", ondelete="CASCADE"), nullable=False)
     platform = Column(String(50), nullable=False)  # instagram, tiktok, youtube, other
     social_account_id = Column(UUID(as_uuid=True), ForeignKey("social_accounts.id", ondelete="SET NULL"), nullable=True)
-    status = Column(String(50), nullable=False, default="pending")  # pending, success, failed
+    status = Column(String(50), nullable=False, default="pending")  # pending, processing, retry, success, failed
     external_post_id = Column(String(255), nullable=True)  # Platform-specific post ID
     external_url = Column(String(500), nullable=True)  # URL of the published post
     error_message = Column(Text, nullable=True)  # Error message if failed
     requested_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     published_at = Column(DateTime, nullable=True)  # When successfully published
+    
+    # Retry mechanism fields
+    retry_count = Column(Integer, nullable=False, default=0)  # Number of retry attempts
+    max_retries = Column(Integer, nullable=False, default=3)  # Maximum retry attempts
+    last_retry_at = Column(DateTime, nullable=True)  # Last retry timestamp
+    
     extra_metadata = Column(JSON, nullable=True)  # Additional publication metadata
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)

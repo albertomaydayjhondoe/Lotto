@@ -3,8 +3,11 @@ Test database utilities
 Provides isolated in-memory database for testing
 """
 import os
+from uuid import uuid4 as _uuid4, UUID as _UUID
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.pool import StaticPool
+from sqlalchemy.types import TypeDecorator, CHAR
+from sqlalchemy.dialects.postgresql import UUID
 
 # Import Base and models
 import sys
@@ -12,6 +15,50 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'backend'))
 
 from app.core.database import Base
 from app.models import database  # Import all models to register them
+
+
+# GUID type for SQLite (stores as string)
+class GUID(TypeDecorator):
+    """Platform-independent GUID type. Uses PostgreSQL's UUID type, otherwise uses CHAR(36)."""
+    impl = CHAR
+    cache_ok = True
+
+    def load_dialect_impl(self, dialect):
+        if dialect.name == 'postgresql':
+            return dialect.type_descriptor(UUID())
+        else:
+            return dialect.type_descriptor(CHAR(36))
+
+    def process_bind_param(self, value, dialect):
+        if value is None:
+            return value
+        elif dialect.name == 'postgresql':
+            return str(value)
+        else:
+            if isinstance(value, _UUID):
+                return str(value)
+            return value
+
+    def process_result_value(self, value, dialect):
+        if value is None:
+            return value
+        else:
+            if not isinstance(value, _UUID):
+                return _UUID(value)
+            return value
+
+
+# Monkey-patch the UUID type to use GUID for SQLite
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
+import sqlalchemy.dialects.sqlite.base as sqlite_base
+
+# Add visit_UUID method to SQLite compiler
+original_visit_uuid = sqlite_base.SQLiteTypeCompiler.visit_uuid if hasattr(sqlite_base.SQLiteTypeCompiler, 'visit_uuid') else None
+
+def visit_UUID(self, type_, **kw):
+    return "CHAR(36)"
+
+sqlite_base.SQLiteTypeCompiler.visit_UUID = visit_UUID
 
 
 # In-memory SQLite database for testing
