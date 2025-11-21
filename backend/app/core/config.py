@@ -41,6 +41,19 @@ class Settings(BaseSettings):
     # Debug Configuration
     DEBUG_ENDPOINTS_ENABLED: bool = True  # enable /debug endpoints (disable in production)
     
+    # Publishing Scheduler Configuration
+    DEFAULT_TIMEZONE: str = "Europe/Madrid"
+    PLATFORM_WINDOWS: dict = {
+        "instagram": {"start_hour": 18, "end_hour": 23},
+        "tiktok": {"start_hour": 16, "end_hour": 24},
+        "youtube": {"start_hour": 17, "end_hour": 22}
+    }
+    MIN_GAP_MINUTES: dict = {
+        "instagram": 60,
+        "tiktok": 30,
+        "youtube": 90
+    }
+    
     class Config:
         case_sensitive = True
         env_file = ".env"

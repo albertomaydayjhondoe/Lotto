@@ -261,6 +261,12 @@ class PublishLogModel(Base):
     max_retries = Column(Integer, nullable=False, default=3)  # Maximum retry attempts
     last_retry_at = Column(DateTime, nullable=True)  # Last retry timestamp
     
+    # Scheduling fields (PASO 4.4)
+    schedule_type = Column(String(50), default="immediate")  # "immediate" or "scheduled"
+    scheduled_for = Column(DateTime, nullable=True)  # When to publish (for scheduled posts)
+    scheduled_window_end = Column(DateTime, nullable=True)  # End of scheduling window
+    scheduled_by = Column(String(100), nullable=True)  # Who scheduled: "manual", "rule_engine", "campaign_orchestrator"
+    
     extra_metadata = Column(JSON, nullable=True)  # Additional publication metadata
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
