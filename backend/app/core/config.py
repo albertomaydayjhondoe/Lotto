@@ -54,6 +54,10 @@ class Settings(BaseSettings):
         "youtube": 90
     }
     
+    # Orchestrator Configuration
+    ORCHESTRATOR_ENABLED: bool = False  # enable autonomous orchestrator loop
+    ORCHESTRATOR_INTERVAL_SECONDS: int = 2  # seconds between orchestrator cycles
+    
     class Config:
         case_sensitive = True
         env_file = ".env"

@@ -15,6 +15,7 @@ from app.publishing_webhooks.router import router as webhooks_router
 from app.publishing_reconciliation.router import router as reconciliation_router
 from app.publishing_scheduler.router import router as scheduler_router
 from app.publishing_intelligence.router import router as intelligence_router
+from app.orchestrator import orchestrator_router
 from app.core.config import settings
 from app.core.database import init_db
 
@@ -83,6 +84,9 @@ app.include_router(scheduler_router, prefix="/publishing", tags=["scheduler"])
 
 # Publishing Intelligence endpoints (Step 4.5)
 app.include_router(intelligence_router, prefix="/publishing/intelligence", tags=["intelligence"])
+
+# Orchestrator endpoints (Step 4.6)
+app.include_router(orchestrator_router, tags=["orchestrator"])
 
 # Debug endpoints (DEVELOPMENT ONLY)
 # WARNING: In production, these endpoints should be protected with authentication
