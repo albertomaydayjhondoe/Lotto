@@ -16,6 +16,7 @@ from app.publishing_reconciliation.router import router as reconciliation_router
 from app.publishing_scheduler.router import router as scheduler_router
 from app.publishing_intelligence.router import router as intelligence_router
 from app.orchestrator import orchestrator_router
+from app.dashboard_api import dashboard_router
 from app.core.config import settings
 from app.core.database import init_db
 
@@ -87,6 +88,9 @@ app.include_router(intelligence_router, prefix="/publishing/intelligence", tags=
 
 # Orchestrator endpoints (Step 4.6)
 app.include_router(orchestrator_router, tags=["orchestrator"])
+
+# Dashboard API endpoints (PASO 6.1)
+app.include_router(dashboard_router, prefix="/dashboard", tags=["dashboard"])
 
 # Debug endpoints (DEVELOPMENT ONLY)
 # WARNING: In production, these endpoints should be protected with authentication
