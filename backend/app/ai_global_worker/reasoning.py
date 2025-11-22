@@ -15,8 +15,16 @@ from app.ai_global_worker.schemas import (
 from app.ai_global_worker.llm_client import LLMClient
 
 
-# Global LLM client instance
-_llm_client = LLMClient()
+# Global LLM client instance (lazy initialization to avoid circular imports)
+_llm_client = None
+
+
+def _get_llm_client() -> LLMClient:
+    """Get or create global LLM client instance."""
+    global _llm_client
+    if _llm_client is None:
+        _llm_client = LLMClient()
+    return _llm_client
 
 
 async def run_full_reasoning(snapshot: SystemSnapshot) -> AIReasoningOutput:
@@ -36,10 +44,13 @@ async def run_full_reasoning(snapshot: SystemSnapshot) -> AIReasoningOutput:
     """
     start_time = time.time()
     
+    # Get LLM client (lazy initialization)
+    client = _get_llm_client()
+    
     # Generate all AI outputs
-    summary = await _llm_client.generate_summary(snapshot)
-    recommendations = await _llm_client.generate_recommendations(snapshot)
-    action_plan = await _llm_client.generate_action_plan(snapshot)
+    summary = await client.generate_summary(snapshot)
+    recommendations = await client.generate_recommendations(snapshot)
+    action_plan = await client.generate_action_plan(snapshot)
     
     # Calculate execution time
     execution_time_ms = int((time.time() - start_time) * 1000)
