@@ -1,15 +1,20 @@
 """
-GPT-5 Client (OpenAI) - PASO 7.2 STUB Implementation
+GPT-5 Client (OpenAI) - PASO 7.3 LIVE Implementation
 
 This client is designed for SHORT, CRITICAL tasks:
 - Recommendations (high-impact, prioritized actions)
 - Action plans (critical execution steps)
 - Quick diagnostic decisions
 
-Current Status: STUB MODE (no real API calls)
-Future: PASO 7.3 will activate real OpenAI API integration
+Status: LIVE MODE with fallback to STUB
+- If AI_LLM_MODE="live" and API key present → real OpenAI API calls
+- If AI_LLM_MODE="stub" or no API key → stub mode
+- Automatic fallback to stub on API errors
 """
 
+import asyncio
+import json
+import logging
 import uuid
 from datetime import datetime
 from typing import List, Optional
@@ -21,61 +26,111 @@ from app.ai_global_worker.schemas import (
     AIActionPlan,
 )
 
+logger = logging.getLogger(__name__)
+
 
 class GPT5Client:
     """
-    OpenAI GPT-5 client for critical, short-context tasks.
+    OpenAI GPT client for critical, short-context tasks.
     
-    Current Implementation (PASO 7.2):
-    -----------------------------------
-    - Stub mode: Generates deterministic responses based on heuristics
-    - No actual API calls to OpenAI
-    - Designed to maintain interface for future integration
-    
-    Future Implementation (PASO 7.3):
-    ----------------------------------
-    - Will use OpenAI Python SDK (openai>=1.0.0)
-    - Real API calls to GPT-5.1 or latest GPT-5 model
-    - Prompt engineering for optimal results
-    - Error handling, retries, cost tracking
+    Implementation (PASO 7.3):
+    --------------------------
+    - Uses OpenAI Python SDK (openai>=1.0.0)
+    - Real API calls to GPT-4 (or GPT-5 when available)
+    - Automatic fallback to stub mode on errors
+    - Retry logic with exponential backoff
+    - Structured logging
     
     Configuration:
     --------------
     api_key: Optional[str] - OpenAI API key (from env: OPENAI_API_KEY)
-    model: str - Model identifier (default: "gpt-5.1")
+    model: str - Model identifier (default from config: AI_OPENAI_MODEL_NAME)
+    mode: str - "live" or "stub" (from config: AI_LLM_MODE)
     """
     
     def __init__(
         self,
         api_key: Optional[str] = None,
-        model: str = "gpt-5.1",
+        model: str = "gpt-4",
+        mode: str = "stub",
     ):
         """
-        Initialize GPT-5 client.
+        Initialize GPT client.
         
         Args:
             api_key: OpenAI API key (optional, None = stub mode)
-            model: GPT-5 model identifier (e.g., "gpt-5.1", "gpt-5-turbo")
-        
-        Note:
-            Even with api_key provided, PASO 7.2 operates in stub mode.
-            Real API integration will be activated in PASO 7.3.
+            model: GPT model identifier (e.g., "gpt-4", "gpt-4-turbo")
+            mode: Operation mode ("live" or "stub")
         """
         self.api_key = api_key
         self.model = model
+        self.mode = mode
+        self.client = None
         
-        # TODO (PASO 7.3): Initialize OpenAI client
-        # from openai import AsyncOpenAI
-        # self.client = AsyncOpenAI(api_key=api_key) if api_key else None
+        # Initialize OpenAI client if in live mode with API key
+        if mode == "live" and api_key:
+            try:
+                from openai import AsyncOpenAI
+                self.client = AsyncOpenAI(api_key=api_key)
+                logger.info(f"GPT5Client initialized in LIVE mode with model: {model}")
+            except ImportError:
+                logger.warning("OpenAI SDK not installed. Install with: pip install openai")
+                logger.info("Falling back to STUB mode")
+                self.mode = "stub"
+            except Exception as e:
+                logger.error(f"Failed to initialize OpenAI client: {e}")
+                logger.info("Falling back to STUB mode")
+                self.mode = "stub"
+        else:
+            logger.info(f"GPT5Client initialized in STUB mode (mode={mode}, has_key={api_key is not None})")
+    
+    async def _call_openai_with_retry(
+        self,
+        messages: list,
+        response_format: dict,
+        temperature: float,
+        max_tokens: int,
+        max_retries: int = 1,
+    ) -> Optional[str]:
+        """
+        Call OpenAI API with retry logic.
         
-        self.client = None  # Stub mode for now
+        Args:
+            messages: Chat messages
+            response_format: Response format configuration
+            temperature: Sampling temperature
+            max_tokens: Maximum tokens to generate
+            max_retries: Maximum number of retries (default: 1)
+            
+        Returns:
+            Response text or None on failure
+        """
+        for attempt in range(max_retries + 1):
+            try:
+                response = await self.client.chat.completions.create(
+                    model=self.model,
+                    messages=messages,
+                    response_format=response_format,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                    timeout=30.0,  # 30 second timeout
+                )
+                return response.choices[0].message.content
+            except Exception as e:
+                logger.warning(f"OpenAI API call failed (attempt {attempt + 1}/{max_retries + 1}): {e}")
+                if attempt < max_retries:
+                    await asyncio.sleep(2.0)  # 2 second backoff
+                else:
+                    logger.error(f"OpenAI API call failed after {max_retries + 1} attempts")
+                    return None
+        return None
     
     async def generate_summary(
         self,
         snapshot: SystemSnapshot,
     ) -> AISummary:
         """
-        Generate system health summary using GPT-5.
+        Generate system health summary using OpenAI GPT.
         
         Note: This method is available but NOT used by default router.
         Router policy assigns summary generation to Gemini 2.0.
@@ -86,48 +141,79 @@ class GPT5Client:
             
         Returns:
             AISummary: Health assessment with score and insights
-        
-        Current Implementation (PASO 7.2):
-        -----------------------------------
-        Stub implementation using heuristics-based health scoring.
-        
-        Future Implementation (PASO 7.3):
-        ----------------------------------
-        # TODO (PASO 7.3): Replace with actual GPT-5 API call
-        # 
-        # Example integration:
-        # 
-        # prompt = self._build_summary_prompt(snapshot)
-        # 
-        # response = await self.client.chat.completions.create(
-        #     model=self.model,
-        #     messages=[
-        #         {
-        #             "role": "system",
-        #             "content": '''You are an expert system analyst for a social
-        #                           media content automation platform. Analyze the
-        #                           provided metrics and generate a comprehensive
-        #                           health summary in JSON format.'''
-        #         },
-        #         {
-        #             "role": "user",
-        #             "content": prompt
-        #         }
-        #     ],
-        #     response_format={"type": "json_object"},
-        #     temperature=0.3,  # Lower temperature for consistency
-        #     max_tokens=800,
-        # )
-        # 
-        # data = json.loads(response.choices[0].message.content)
-        # return AISummary(**data, generated_at=datetime.utcnow())
-        # 
-        # References:
-        # - OpenAI API Docs: https://platform.openai.com/docs/api-reference
-        # - JSON mode: https://platform.openai.com/docs/guides/text-generation/json-mode
-        # - Best practices: https://platform.openai.com/docs/guides/prompt-engineering
         """
-        # STUB IMPLEMENTATION (PASO 7.2)
+        # Try live mode first if enabled
+        if self.mode == "live" and self.client:
+            try:
+                logger.info("Generating summary using OpenAI (live mode)")
+                
+                # Build prompt
+                prompt = self._build_summary_prompt(snapshot)
+                
+                # Call API with retry
+                response_text = await self._call_openai_with_retry(
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": """You are an expert system analyst for a social media automation platform.
+Analyze the provided metrics and generate a comprehensive health summary in JSON format.
+
+Return JSON with this structure:
+{
+  "overall_health": "excellent" | "good" | "warning" | "critical",
+  "health_score": 0-100,
+  "key_insights": ["insight 1", "insight 2", "insight 3"],
+  "concerns": ["concern 1", "concern 2"],
+  "positives": ["positive 1", "positive 2"]
+}"""
+                        },
+                        {
+                            "role": "user",
+                            "content": prompt
+                        }
+                    ],
+                    response_format={"type": "json_object"},
+                    temperature=0.3,
+                    max_tokens=800,
+                )
+                
+                if response_text:
+                    data = json.loads(response_text)
+                    summary = AISummary(
+                        **data,
+                        generated_at=datetime.utcnow()
+                    )
+                    logger.info(f"OpenAI generated summary (success): health={summary.overall_health}, score={summary.health_score}")
+                    return summary
+                else:
+                    logger.warning("OpenAI API returned no response, falling back to stub")
+                    
+            except json.JSONDecodeError as e:
+                logger.error(f"Failed to parse OpenAI response as JSON: {e}")
+            except Exception as e:
+                logger.error(f"Error calling OpenAI API: {e}")
+        
+        # Fallback to stub implementation
+        logger.info("Generating summary using stub mode (fallback)")
+        return self._generate_summary_stub(snapshot)
+    
+    def _build_summary_prompt(self, snapshot: SystemSnapshot) -> str:
+        """Build prompt for summary generation."""
+        return f"""Analyze this social media automation system:
+
+METRICS:
+- Queue: {snapshot.queue_pending} pending, {snapshot.queue_processing} processing, {snapshot.queue_failed} failed
+- Publishing: {snapshot.publish_total_24h} in 24h ({snapshot.publish_success_rate:.1f}% success), {snapshot.publish_failed_24h} failed
+- Content: {snapshot.clips_ready} clips ready, {snapshot.clips_pending_analysis} pending analysis
+- Jobs: {snapshot.jobs_pending} pending, {snapshot.jobs_failed} failed
+- Campaigns: {snapshot.campaigns_active} active, {snapshot.campaigns_draft} draft
+- Alerts: {snapshot.alerts_critical} critical, {snapshot.alerts_warning} warnings
+- System: Orchestrator {'running' if snapshot.orchestrator_running else 'stopped'}
+
+Provide a concise health summary with score (0-100), key insights, concerns, and positives."""
+    
+    def _generate_summary_stub(self, snapshot: SystemSnapshot) -> AISummary:
+        """Stub implementation using heuristics-based health scoring."""
         health_score = self._calculate_health_score(snapshot)
         health_status = self._get_health_status(health_score)
         
@@ -149,59 +235,102 @@ class GPT5Client:
         snapshot: SystemSnapshot,
     ) -> List[AIRecommendation]:
         """
-        Generate prioritized recommendations using GPT-5.
+        Generate prioritized recommendations using OpenAI GPT.
         
-        This is a PRIMARY use case for GPT-5 (critical + short).
-        Router policy assigns this task to GPT-5.
+        This is a PRIMARY use case for GPT (critical + short).
+        Router policy assigns this task to GPT.
         
         Args:
             snapshot: Complete system state snapshot
             
         Returns:
             List[AIRecommendation]: Prioritized recommendations (1-5 items)
-        
-        Current Implementation (PASO 7.2):
-        -----------------------------------
-        Stub implementation using rule-based recommendation generation.
-        
-        Future Implementation (PASO 7.3):
-        ----------------------------------
-        # TODO (PASO 7.3): Replace with actual GPT-5 API call
-        # 
-        # Example integration:
-        # 
-        # prompt = self._build_recommendations_prompt(snapshot)
-        # 
-        # response = await self.client.chat.completions.create(
-        #     model=self.model,
-        #     messages=[
-        #         {
-        #             "role": "system",
-        #             "content": '''You are an expert system optimizer. Analyze
-        #                           the system state and generate 1-5 prioritized,
-        #                           actionable recommendations in JSON format.
-        #                           Focus on high-impact, low-effort improvements.'''
-        #         },
-        #         {
-        #             "role": "user",
-        #             "content": prompt
-        #         }
-        #     ],
-        #     response_format={"type": "json_object"},
-        #     temperature=0.5,  # Balanced creativity
-        #     max_tokens=1200,
-        # )
-        # 
-        # data = json.loads(response.choices[0].message.content)
-        # return [AIRecommendation(**rec) for rec in data["recommendations"]]
-        # 
-        # Prompt Engineering Tips:
-        # - Include concrete metrics from snapshot
-        # - Request specific priority levels (critical/high/medium/low)
-        # - Ask for effort estimates (low/medium/high)
-        # - Request action_type and action_payload for automation
         """
-        # STUB IMPLEMENTATION (PASO 7.2)
+        # Try live mode first if enabled
+        if self.mode == "live" and self.client:
+            try:
+                logger.info("Generating recommendations using OpenAI (live mode)")
+                
+                # Build prompt
+                prompt = self._build_recommendations_prompt(snapshot)
+                
+                # Call API with retry
+                response_text = await self._call_openai_with_retry(
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": """You are an expert system optimizer for a social media automation platform. 
+Analyze the system state and generate 1-5 prioritized, actionable recommendations in JSON format.
+Focus on high-impact, low-effort improvements.
+
+Return JSON with this structure:
+{
+  "recommendations": [
+    {
+      "priority": "critical" | "high" | "medium" | "low",
+      "category": "performance" | "content" | "system" | "automation",
+      "title": "Brief title (max 60 chars)",
+      "description": "Detailed description with specific metrics",
+      "impact": "Expected impact if implemented",
+      "effort": "low" | "medium" | "high",
+      "action_type": "process_queue" | "process_pending_jobs" | "scale_workers" | null,
+      "action_payload": {}
+    }
+  ]
+}"""
+                        },
+                        {
+                            "role": "user",
+                            "content": prompt
+                        }
+                    ],
+                    response_format={"type": "json_object"},
+                    temperature=0.5,
+                    max_tokens=1200,
+                )
+                
+                if response_text:
+                    data = json.loads(response_text)
+                    recommendations = [
+                        AIRecommendation(
+                            id=str(uuid.uuid4()),
+                            **rec
+                        )
+                        for rec in data.get("recommendations", [])
+                    ]
+                    logger.info(f"OpenAI generated {len(recommendations)} recommendations (success)")
+                    return recommendations
+                else:
+                    logger.warning("OpenAI API returned no response, falling back to stub")
+                    
+            except json.JSONDecodeError as e:
+                logger.error(f"Failed to parse OpenAI response as JSON: {e}")
+            except Exception as e:
+                logger.error(f"Error calling OpenAI API: {e}")
+        
+        # Fallback to stub implementation
+        logger.info("Generating recommendations using stub mode (fallback)")
+        return self._generate_recommendations_stub(snapshot)
+    
+    def _build_recommendations_prompt(self, snapshot: SystemSnapshot) -> str:
+        """Build prompt for recommendations generation."""
+        return f"""Analyze this social media automation system and provide recommendations:
+
+SYSTEM METRICS:
+- Queue: {snapshot.queue_pending} pending, {snapshot.queue_processing} processing, {snapshot.queue_failed} failed
+- Publishing: {snapshot.publish_total_24h} publications in 24h, {snapshot.publish_success_rate:.1f}% success rate
+- Publishing: {snapshot.publish_failed_24h} failed in 24h
+- Content: {snapshot.clips_ready} clips ready, {snapshot.clips_pending_analysis} pending analysis
+- Jobs: {snapshot.jobs_pending} pending, {snapshot.jobs_failed} failed
+- Campaigns: {snapshot.campaigns_active} active, {snapshot.campaigns_draft} draft
+- Alerts: {snapshot.alerts_critical} critical, {snapshot.alerts_warning} warnings
+- System: Orchestrator {'running' if snapshot.orchestrator_running else 'stopped'}
+
+Generate 1-5 prioritized recommendations to improve system performance and reliability.
+Focus on actionable items with clear impact and effort estimates."""
+    
+    def _generate_recommendations_stub(self, snapshot: SystemSnapshot) -> List[AIRecommendation]:
+        """Stub implementation using rule-based recommendation generation."""
         recommendations = []
         
         # Queue backlog
@@ -276,10 +405,10 @@ class GPT5Client:
         recommendations: List[AIRecommendation],
     ) -> AIActionPlan:
         """
-        Generate executable action plan using GPT-5.
+        Generate executable action plan using OpenAI GPT.
         
-        This is a PRIMARY use case for GPT-5 (critical + short).
-        Router policy assigns this task to GPT-5.
+        This is a PRIMARY use case for GPT (critical + short).
+        Router policy assigns this task to GPT.
         
         Args:
             snapshot: Complete system state snapshot
@@ -287,50 +416,103 @@ class GPT5Client:
             
         Returns:
             AIActionPlan: Ordered steps with risk assessment
-        
-        Current Implementation (PASO 7.2):
-        -----------------------------------
-        Stub implementation using rule-based plan generation.
-        
-        Future Implementation (PASO 7.3):
-        ----------------------------------
-        # TODO (PASO 7.3): Replace with actual GPT-5 API call
-        # 
-        # Example integration:
-        # 
-        # prompt = self._build_action_plan_prompt(snapshot, recommendations)
-        # 
-        # response = await self.client.chat.completions.create(
-        #     model=self.model,
-        #     messages=[
-        #         {
-        #             "role": "system",
-        #             "content": '''You are an expert operations planner. Create
-        #                           a detailed, step-by-step action plan based on
-        #                           the provided recommendations. Include risk
-        #                           assessment and automation capabilities.'''
-        #         },
-        #         {
-        #             "role": "user",
-        #             "content": prompt
-        #         }
-        #     ],
-        #     response_format={"type": "json_object"},
-        #     temperature=0.3,  # Lower temperature for consistency
-        #     max_tokens=1000,
-        # )
-        # 
-        # data = json.loads(response.choices[0].message.content)
-        # return AIActionPlan(**data)
-        # 
-        # Prompt Engineering Tips:
-        # - Include all recommendations in context
-        # - Request ordered steps (1, 2, 3...)
-        # - Ask for estimated duration per step
-        # - Request risk level assessment (low/medium/high)
-        # - Ask about automation feasibility
         """
-        # STUB IMPLEMENTATION (PASO 7.2)
+        # Try live mode first if enabled
+        if self.mode == "live" and self.client:
+            try:
+                logger.info("Generating action plan using OpenAI (live mode)")
+                
+                # Build prompt
+                prompt = self._build_action_plan_prompt(snapshot, recommendations)
+                
+                # Call API with retry
+                response_text = await self._call_openai_with_retry(
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": """You are an expert operations planner for a social media automation platform.
+Create a detailed, step-by-step action plan based on the provided recommendations.
+Include risk assessment and automation capabilities.
+
+Return JSON with this structure:
+{
+  "title": "Concise plan title",
+  "objective": "What this plan aims to achieve",
+  "steps": [
+    {
+      "step": 1,
+      "action": "process_queue" | "manual_review" | "scale_workers" | etc,
+      "description": "What to do in this step",
+      "automated": true | false,
+      "estimated_duration": "30 minutes" | "2 hours" | etc
+    }
+  ],
+  "estimated_duration": "Total time estimate",
+  "risk_level": "low" | "medium" | "high",
+  "automated": true | false
+}"""
+                        },
+                        {
+                            "role": "user",
+                            "content": prompt
+                        }
+                    ],
+                    response_format={"type": "json_object"},
+                    temperature=0.3,
+                    max_tokens=1000,
+                )
+                
+                if response_text:
+                    data = json.loads(response_text)
+                    plan = AIActionPlan(
+                        plan_id=str(uuid.uuid4()),
+                        **data
+                    )
+                    logger.info(f"OpenAI generated action plan with {len(plan.steps)} steps (success)")
+                    return plan
+                else:
+                    logger.warning("OpenAI API returned no response, falling back to stub")
+                    
+            except json.JSONDecodeError as e:
+                logger.error(f"Failed to parse OpenAI response as JSON: {e}")
+            except Exception as e:
+                logger.error(f"Error calling OpenAI API: {e}")
+        
+        # Fallback to stub implementation
+        logger.info("Generating action plan using stub mode (fallback)")
+        return self._generate_action_plan_stub(snapshot, recommendations)
+    
+    def _build_action_plan_prompt(
+        self,
+        snapshot: SystemSnapshot,
+        recommendations: List[AIRecommendation]
+    ) -> str:
+        """Build prompt for action plan generation."""
+        recs_text = "\n".join([
+            f"- [{rec.priority.upper()}] {rec.title}: {rec.description}"
+            for rec in recommendations
+        ])
+        
+        return f"""Create an action plan based on these recommendations:
+
+RECOMMENDATIONS:
+{recs_text}
+
+SYSTEM CONTEXT:
+- Queue: {snapshot.queue_pending} pending, {snapshot.queue_failed} failed
+- Publishing: {snapshot.publish_success_rate:.1f}% success rate
+- Clips ready: {snapshot.clips_ready}
+- Critical alerts: {snapshot.alerts_critical}
+
+Generate an ordered, step-by-step plan to address these recommendations.
+Include risk assessment and automation feasibility."""
+    
+    def _generate_action_plan_stub(
+        self,
+        snapshot: SystemSnapshot,
+        recommendations: List[AIRecommendation]
+    ) -> AIActionPlan:
+        """Stub implementation using rule-based plan generation."""
         steps = []
         step_num = 1
         

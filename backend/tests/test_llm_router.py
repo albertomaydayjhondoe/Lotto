@@ -290,25 +290,28 @@ def test_real_clients_use_correct_models():
     - GPT5Client stores correct model name
     - GeminiClient stores correct model name
     - API keys are stored (even if None)
+    - Mode parameter controls behavior
     """
-    # Test GPT5Client
-    gpt5 = GPT5Client(api_key="test-key", model="gpt-5.1")
+    # Test GPT5Client in stub mode
+    gpt5 = GPT5Client(api_key="test-key", model="gpt-4", mode="stub")
     assert gpt5.api_key == "test-key"
-    assert gpt5.model == "gpt-5.1"
+    assert gpt5.model == "gpt-4"
+    assert gpt5.mode == "stub"
     assert gpt5.client is None  # Stub mode
     
-    # Test GeminiClient
-    gemini = GeminiClient(api_key="test-key-2", model="gemini-2.0-pro")
+    # Test GeminiClient in stub mode
+    gemini = GeminiClient(api_key="test-key-2", model="gemini-2.0-pro", mode="stub")
     assert gemini.api_key == "test-key-2"
     assert gemini.model == "gemini-2.0-pro"
+    assert gemini.mode == "stub"
     assert gemini.client is None  # Stub mode
     
     # Test without API keys
-    gpt5_no_key = GPT5Client()
+    gpt5_no_key = GPT5Client(api_key=None, model="gpt-4", mode="stub")
     assert gpt5_no_key.api_key is None
-    assert gpt5_no_key.model == "gpt-5.1"
+    assert gpt5_no_key.model == "gpt-4"
     
-    gemini_no_key = GeminiClient()
+    gemini_no_key = GeminiClient(api_key=None, model="gemini-2.0-pro", mode="stub")
     assert gemini_no_key.api_key is None
     assert gemini_no_key.model == "gemini-2.0-pro"
 
@@ -333,8 +336,8 @@ def test_create_default_llm_router():
     assert isinstance(router.gpt5, GPT5Client)
     
     # Verify clients have correct models from settings
-    assert router.gpt5.model == settings.OPENAI_GPT5_MODEL
-    assert router.gemini.model == settings.GEMINI_MODEL
+    assert router.gpt5.model == settings.AI_OPENAI_MODEL_NAME
+    assert router.gemini.model == settings.AI_GEMINI_MODEL_NAME
 
 
 # ==================== TEST 7: Router Method Names Are Descriptive ====================

@@ -1,15 +1,16 @@
 """
-LLM Providers Module - Dual Router Architecture (PASO 7.2)
+LLM Providers Module - Dual Router Architecture (PASO 7.3)
 
 This module provides a dual LLM routing system that intelligently
-selects between GPT-5 (OpenAI) and Gemini 2.0 (Google) based on
+selects between GPT (OpenAI) and Gemini 2.0 (Google) based on
 task characteristics:
 
-- GPT-5: Short, critical tasks (recommendations, action plans)
+- GPT: Short, critical tasks (recommendations, action plans)
 - Gemini 2.0: Long context, less critical tasks (summaries)
 
-Current implementation: STUB mode (no real API calls)
-Future: PASO 7.3 will activate real API integrations
+Implementation: Supports both LIVE and STUB modes
+- LIVE mode: Real API calls with fallback to stub on errors
+- STUB mode: Deterministic heuristics-based responses
 """
 
 from app.llm_providers.router import DualLLMRouter
@@ -28,34 +29,38 @@ def create_default_llm_router(settings) -> DualLLMRouter:
     """
     Create a DualLLMRouter instance with default configuration.
     
-    Reads API keys and model names from settings (environment variables).
+    Reads API keys, model names, and operation mode from settings.
     
     Args:
         settings: Application settings instance with LLM configuration
         
     Returns:
-        DualLLMRouter instance configured with GPT-5 and Gemini clients
+        DualLLMRouter instance configured with GPT and Gemini clients
         
     Configuration (from settings):
-        - OPENAI_API_KEY: OpenAI API key (optional, None = stub mode)
-        - OPENAI_GPT5_MODEL: Model identifier (default: "gpt-5.1")
-        - GEMINI_API_KEY: Google Gemini API key (optional, None = stub mode)
-        - GEMINI_MODEL: Model identifier (default: "gemini-2.0-pro")
+        - AI_LLM_MODE: "live" or "stub" (default: "stub")
+        - OPENAI_API_KEY: OpenAI API key (optional)
+        - AI_OPENAI_MODEL_NAME: Model identifier (default: "gpt-4")
+        - GEMINI_API_KEY: Google Gemini API key (optional)
+        - AI_GEMINI_MODEL_NAME: Model identifier (default: "gemini-2.0-flash-exp")
     
-    Note:
-        Current implementation works in STUB mode even with API keys.
-        Real API calls will be activated in PASO 7.3.
+    Behavior:
+        - If AI_LLM_MODE="live" and API keys present → real API calls
+        - If AI_LLM_MODE="stub" or missing keys → stub mode
+        - Automatic fallback to stub on API errors
     """
-    # Create GPT-5 client
+    # Create GPT client
     gpt5_client = GPT5Client(
         api_key=settings.OPENAI_API_KEY,
-        model=settings.OPENAI_GPT5_MODEL,
+        model=settings.AI_OPENAI_MODEL_NAME,
+        mode=settings.AI_LLM_MODE,
     )
     
     # Create Gemini client
     gemini_client = GeminiClient(
         api_key=settings.GEMINI_API_KEY,
-        model=settings.GEMINI_MODEL,
+        model=settings.AI_GEMINI_MODEL_NAME,
+        mode=settings.AI_LLM_MODE,
     )
     
     # Create and return router

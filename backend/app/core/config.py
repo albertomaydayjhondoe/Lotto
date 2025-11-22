@@ -65,18 +65,21 @@ class Settings(BaseSettings):
     AI_WORKER_ENABLED: bool = True  # enable AI global worker
     AI_WORKER_INTERVAL_SECONDS: int = 30  # seconds between AI reasoning cycles
     
-    # LLM Provider Configuration (PASO 7.2)
+    # LLM Provider Configuration (PASO 7.2 - PASO 7.3)
+    # Operation Mode
+    AI_LLM_MODE: str = "stub"  # "stub" or "live" - controls whether to use real API calls
+    
     # OpenAI GPT-5 Configuration
     OPENAI_API_KEY: str | None = None  # OpenAI API key (env: OPENAI_API_KEY)
-    OPENAI_GPT5_MODEL: str = "gpt-5.1"  # GPT-5 model identifier (placeholder for PASO 7.3)
+    AI_OPENAI_MODEL_NAME: str = "gpt-4"  # OpenAI model (use gpt-4 until gpt-5 is available)
     
     # Google Gemini 2.0 Configuration
     GEMINI_API_KEY: str | None = None  # Google Gemini API key (env: GEMINI_API_KEY)
-    GEMINI_MODEL: str = "gemini-2.0-pro"  # Gemini model identifier (placeholder for PASO 7.3)
+    AI_GEMINI_MODEL_NAME: str = "gemini-2.0-flash-exp"  # Gemini model identifier
     
-    # Note: Current implementation (PASO 7.2) operates in STUB mode.
-    #       Real API integration will be activated in PASO 7.3.
-    #       API keys can be provided but won't be used until PASO 7.3.
+    # Note: PASO 7.3 activates real LLM integration
+    #       - If AI_LLM_MODE="stub" or API keys are missing → stub mode (safe default)
+    #       - If AI_LLM_MODE="live" and API keys present → real API calls with fallback
     
     # Security / Credentials Encryption (PASO 5.1)
     CREDENTIALS_ENCRYPTION_KEY: str | None = None  # Fernet key for encrypting social account credentials
