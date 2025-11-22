@@ -17,6 +17,8 @@ from app.publishing_scheduler.router import router as scheduler_router
 from app.publishing_intelligence.router import router as intelligence_router
 from app.orchestrator import orchestrator_router
 from app.dashboard_api import dashboard_router
+from app.dashboard_ai import router as dashboard_ai_router
+from app.dashboard_actions import router as dashboard_actions_router
 from app.core.config import settings
 from app.core.database import init_db
 
@@ -91,6 +93,12 @@ app.include_router(orchestrator_router, tags=["orchestrator"])
 
 # Dashboard API endpoints (PASO 6.1)
 app.include_router(dashboard_router, prefix="/dashboard", tags=["dashboard"])
+
+# Dashboard AI endpoints (PASO 6.3)
+app.include_router(dashboard_ai_router, prefix="/dashboard", tags=["dashboard_ai"])
+
+# Dashboard Actions endpoints (PASO 6.3)
+app.include_router(dashboard_actions_router, prefix="/dashboard", tags=["dashboard_actions"])
 
 # Debug endpoints (DEVELOPMENT ONLY)
 # WARNING: In production, these endpoints should be protected with authentication

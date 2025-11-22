@@ -11,7 +11,10 @@ import {
   Megaphone,
   LogOut,
   Menu,
-  X
+  X,
+  Sparkles,
+  Lightbulb,
+  Zap
 } from "lucide-react"
 import { useAuth } from "@/hooks/use-auth"
 import { cn } from "@/lib/utils"
@@ -23,6 +26,12 @@ const navigation = [
   { name: "Orchestrator", href: "/dashboard/orchestrator", icon: Settings },
   { name: "Platforms", href: "/dashboard/platforms", icon: TrendingUp },
   { name: "Campaigns", href: "/dashboard/campaigns", icon: Megaphone },
+]
+
+const aiNavigation = [
+  { name: "AI Overview", href: "/dashboard/ai", icon: Sparkles },
+  { name: "Recommendations", href: "/dashboard/ai/recommendations", icon: Lightbulb },
+  { name: "Actions", href: "/dashboard/ai/actions", icon: Zap },
 ]
 
 export default function DashboardLayout({
@@ -67,26 +76,57 @@ export default function DashboardLayout({
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 p-4 space-y-1">
-            {navigation.map((item) => {
-              const isActive = pathname === item.href
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={cn(
-                    "flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors",
-                    isActive
-                      ? "bg-primary text-primary-foreground"
-                      : "text-gray-700 hover:bg-gray-100"
-                  )}
-                  onClick={() => setSidebarOpen(false)}
-                >
-                  <item.icon className="h-5 w-5" />
-                  <span className="font-medium">{item.name}</span>
-                </Link>
-              )
-            })}
+          <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+            {/* Main Navigation */}
+            <div className="space-y-1">
+              {navigation.map((item) => {
+                const isActive = pathname === item.href
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={cn(
+                      "flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors",
+                      isActive
+                        ? "bg-primary text-primary-foreground"
+                        : "text-gray-700 hover:bg-gray-100"
+                    )}
+                    onClick={() => setSidebarOpen(false)}
+                  >
+                    <item.icon className="h-5 w-5" />
+                    <span className="font-medium">{item.name}</span>
+                  </Link>
+                )
+              })}
+            </div>
+
+            {/* AI Section */}
+            <div className="pt-4 mt-4 border-t">
+              <div className="px-4 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                AI Intelligence
+              </div>
+              <div className="space-y-1">
+                {aiNavigation.map((item) => {
+                  const isActive = pathname === item.href
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className={cn(
+                        "flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors",
+                        isActive
+                          ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white"
+                          : "text-gray-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50"
+                      )}
+                      onClick={() => setSidebarOpen(false)}
+                    >
+                      <item.icon className="h-5 w-5" />
+                      <span className="font-medium">{item.name}</span>
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
           </nav>
 
           {/* Logout */}
