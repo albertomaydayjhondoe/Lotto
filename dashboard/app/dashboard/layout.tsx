@@ -14,11 +14,14 @@ import {
   X,
   Sparkles,
   Lightbulb,
-  Zap
+  Zap,
+  Bell
 } from "lucide-react"
 import { useAuth } from "@/hooks/use-auth"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { useAlertStats } from "@/lib/alerts/hooks"
 
 const navigation = [
   { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
@@ -26,6 +29,7 @@ const navigation = [
   { name: "Orchestrator", href: "/dashboard/orchestrator", icon: Settings },
   { name: "Platforms", href: "/dashboard/platforms", icon: TrendingUp },
   { name: "Campaigns", href: "/dashboard/campaigns", icon: Megaphone },
+  { name: "Alerts", href: "/dashboard/alerts", icon: Bell },
 ]
 
 const aiNavigation = [
@@ -42,6 +46,7 @@ export default function DashboardLayout({
   const pathname = usePathname()
   const { logout } = useAuth()
   const [sidebarOpen, setSidebarOpen] = React.useState(false)
+  const { data: alertStats } = useAlertStats()
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -81,20 +86,33 @@ export default function DashboardLayout({
             <div className="space-y-1">
               {navigation.map((item) => {
                 const isActive = pathname === item.href
+                const isAlerts = item.name === "Alerts"
+                const unreadCount = alertStats?.unread_count || 0
+                
                 return (
                   <Link
                     key={item.name}
                     href={item.href}
                     className={cn(
-                      "flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors",
+                      "flex items-center justify-between px-4 py-3 rounded-lg transition-colors",
                       isActive
                         ? "bg-primary text-primary-foreground"
                         : "text-gray-700 hover:bg-gray-100"
                     )}
                     onClick={() => setSidebarOpen(false)}
                   >
-                    <item.icon className="h-5 w-5" />
-                    <span className="font-medium">{item.name}</span>
+                    <div className="flex items-center space-x-3">
+                      <item.icon className="h-5 w-5" />
+                      <span className="font-medium">{item.name}</span>
+                    </div>
+                    {isAlerts && unreadCount > 0 && (
+                      <Badge 
+                        variant="destructive" 
+                        className="h-5 min-w-[20px] flex items-center justify-center text-xs px-1.5"
+                      >
+                        {unreadCount > 99 ? '99+' : unreadCount}
+                      </Badge>
+                    )}
                   </Link>
                 )
               })}
@@ -156,6 +174,17 @@ export default function DashboardLayout({
             </button>
             <h1 className="text-2xl font-bold">Dashboard</h1>
             <div className="flex items-center space-x-4">
+              <Link href="/dashboard/alerts" className="relative">
+                <Bell className="h-6 w-6 text-gray-500 hover:text-gray-700 transition-colors" />
+                {alertStats && alertStats.unread_count > 0 && (
+                  <Badge 
+                    variant="destructive" 
+                    className="absolute -top-2 -right-2 h-5 min-w-[20px] flex items-center justify-center text-xs px-1.5"
+                  >
+                    {alertStats.unread_count > 99 ? '99+' : alertStats.unread_count}
+                  </Badge>
+                )}
+              </Link>
               <span className="text-sm text-gray-500">Admin</span>
             </div>
           </div>

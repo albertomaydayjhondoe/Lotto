@@ -49,6 +49,19 @@ class RuleStatus(str, enum.Enum):
 class PublishLogStatus(str, enum.Enum):
     """Publish log status enumeration."""
     PENDING = "pending"
+    SCHEDULED = "scheduled"
+    PUBLISHING = "publishing"
+    PUBLISHED = "published"
+    FAILED = "failed"
+
+
+class UserRole(str, enum.Enum):
+    """User role enumeration."""
+    ADMIN = "admin"
+    MANAGER = "manager"
+    OPERATOR = "operator"
+    VIEWER = "viewer"
+    PENDING = "pending"
     SUCCESS = "success"
     FAILED = "failed"
 
@@ -287,3 +300,57 @@ class PublishLogModel(Base):
     # Relationships
     clip = relationship("Clip", backref="publish_logs")
     social_account = relationship("SocialAccountModel", back_populates="publish_logs")
+
+
+class AlertEventModel(Base):
+    """Alert events table for alerting system."""
+    __tablename__ = "alert_events"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid4()))
+    alert_type = Column(String(50), nullable=False)
+    severity = Column(String(20), nullable=False)
+    message = Column(Text, nullable=False)
+    alert_metadata = Column("metadata", JSON, nullable=False, default={})  # Renamed to avoid conflict
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    read = Column(Integer, nullable=False, default=0)
+
+    def __repr__(self):
+        return f"<AlertEvent(id={self.id}, type={self.alert_type}, severity={self.severity})>"
+
+
+class UserModel(Base):
+    """Users table for authentication and authorization."""
+    __tablename__ = "users"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid4()))
+    email = Column(String(255), unique=True, nullable=False, index=True)
+    password_hash = Column(String(255), nullable=False)
+    full_name = Column(String(255), nullable=False)
+    role = Column(String(20), nullable=False, default=UserRole.VIEWER.value)
+    is_active = Column(Integer, nullable=False, default=1)  # SQLite compatible (1=True, 0=False)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationship
+    refresh_tokens = relationship("RefreshTokenModel", back_populates="user", cascade="all, delete-orphan")
+
+    def __repr__(self):
+        return f"<User(id={self.id}, email={self.email}, role={self.role})>"
+
+
+class RefreshTokenModel(Base):
+    """Refresh tokens table for JWT token management."""
+    __tablename__ = "refresh_tokens"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid4()))
+    user_id = Column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    token = Column(String(500), unique=True, nullable=False, index=True)
+    expires_at = Column(DateTime, nullable=False)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    revoked = Column(Integer, nullable=False, default=0)  # SQLite compatible (1=True, 0=False)
+
+    # Relationship
+    user = relationship("UserModel", back_populates="refresh_tokens")
+
+    def __repr__(self):
+        return f"<RefreshToken(id={self.id}, user_id={self.user_id}, revoked={bool(self.revoked)})>"

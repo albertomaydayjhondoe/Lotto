@@ -23,6 +23,10 @@ from app.dashboard_actions import router as dashboard_actions_router
 from app.live_telemetry.router import router as telemetry_router
 from app.live_telemetry.telemetry_manager import telemetry_manager
 from app.live_telemetry.collector import gather_metrics
+from app.alerting_engine import router as alerting_router
+from app.alerting_engine.websocket import alert_manager
+from app.alerting_engine.engine import analyze_system_state
+from app.auth import auth_router
 from app.core.config import settings
 from app.core.database import init_db, get_db
 
@@ -59,6 +63,36 @@ async def telemetry_broadcast_loop():
             await asyncio.sleep(settings.TELEMETRY_INTERVAL_SECONDS)
 
 
+async def alert_analysis_loop():
+    """
+    Background task that periodically analyzes system state and generates alerts.
+    
+    Runs every 60 seconds and broadcasts alerts via WebSocket.
+    """
+    while True:
+        try:
+            # Get database session
+            async for db in get_db():
+                # Analyze system state and generate alerts
+                alerts = await analyze_system_state(db)
+                
+                # Broadcast new alerts via WebSocket
+                for alert in alerts:
+                    await alert_manager.broadcast_alert(alert)
+                
+                break  # Exit the async for loop after one iteration
+            
+            # Wait for next interval (60 seconds)
+            await asyncio.sleep(60)
+            
+        except Exception as e:
+            # Log error but keep loop running
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error in alert analysis loop: {e}")
+            await asyncio.sleep(60)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan events."""
@@ -68,6 +102,9 @@ async def lifespan(app: FastAPI):
     # Start telemetry broadcast background task
     telemetry_task = asyncio.create_task(telemetry_broadcast_loop())
     
+    # Start alert analysis background task
+    alert_task = asyncio.create_task(alert_analysis_loop())
+    
     yield
     
     # Shutdown
@@ -75,6 +112,13 @@ async def lifespan(app: FastAPI):
     telemetry_task.cancel()
     try:
         await telemetry_task
+    except asyncio.CancelledError:
+        pass
+    
+    # Cancel alert task
+    alert_task.cancel()
+    try:
+        await alert_task
     except asyncio.CancelledError:
         pass
 
@@ -148,6 +192,12 @@ app.include_router(dashboard_actions_router, prefix="/dashboard", tags=["dashboa
 
 # Live Telemetry WebSocket endpoint (PASO 6.4)
 app.include_router(telemetry_router, prefix="/telemetry", tags=["telemetry"])
+
+# Alerting Engine endpoints (PASO 6.5)
+app.include_router(alerting_router, tags=["alerting"])
+
+# Auth endpoints (PASO 6.6)
+app.include_router(auth_router, tags=["auth"])
 
 # Debug endpoints (DEVELOPMENT ONLY)
 # WARNING: In production, these endpoints should be protected with authentication
