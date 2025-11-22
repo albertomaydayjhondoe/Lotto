@@ -13,13 +13,17 @@ from app.orchestrator.runner import (
     is_orchestrator_running,
     run_orchestrator_once
 )
+from app.auth.permissions import require_role
 
 
 router = APIRouter(prefix="/orchestrator", tags=["orchestrator"])
 
 
 @router.get("/snapshot")
-async def get_system_snapshot(db: AsyncSession = Depends(get_db)):
+async def get_system_snapshot(
+    db: AsyncSession = Depends(get_db),
+    _auth: dict = Depends(require_role("admin", "manager"))
+):
     """
     GET /orchestrator/snapshot
     Get current system state snapshot
@@ -33,7 +37,9 @@ async def get_system_snapshot(db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/run-once")
-async def run_once():
+async def run_once(
+    _auth: dict = Depends(require_role("admin", "manager"))
+):
     """
     POST /orchestrator/run-once
     Run a single orchestrator cycle manually
@@ -48,7 +54,9 @@ async def run_once():
 
 
 @router.post("/enable")
-async def enable_orchestrator():
+async def enable_orchestrator(
+    _auth: dict = Depends(require_role("admin", "manager"))
+):
     """
     POST /orchestrator/enable
     Start the orchestrator autonomous loop
@@ -62,7 +70,9 @@ async def enable_orchestrator():
 
 
 @router.post("/disable")
-async def disable_orchestrator():
+async def disable_orchestrator(
+    _auth: dict = Depends(require_role("admin", "manager"))
+):
     """
     POST /orchestrator/disable
     Stop the orchestrator autonomous loop
@@ -76,7 +86,9 @@ async def disable_orchestrator():
 
 
 @router.get("/status")
-async def get_orchestrator_status():
+async def get_orchestrator_status(
+    _auth: dict = Depends(require_role("admin", "manager"))
+):
     """
     GET /orchestrator/status
     Check if orchestrator is running

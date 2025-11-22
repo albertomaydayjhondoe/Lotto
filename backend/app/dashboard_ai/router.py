@@ -4,6 +4,7 @@ Dashboard AI Router
 FastAPI endpoints for AI analysis, recommendations, and action execution.
 """
 
+from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 

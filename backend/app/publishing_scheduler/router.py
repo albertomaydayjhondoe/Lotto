@@ -6,6 +6,7 @@ from datetime import datetime
 from app.core.database import get_db
 from .models import ScheduleRequest, ScheduleResponse, PublishLogScheduledInfo, SchedulerTickResponse
 from .scheduler import schedule_publication, get_scheduled_logs_for_clip, scheduler_tick
+from app.auth.permissions import require_role
 
 router = APIRouter()
 
@@ -13,7 +14,8 @@ router = APIRouter()
 @router.post("/schedule", response_model=ScheduleResponse)
 async def schedule_publish(
     request: ScheduleRequest,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    _auth: dict = Depends(require_role("admin", "manager"))
 ):
     """
     Schedule a publication for future delivery.
@@ -51,7 +53,8 @@ async def schedule_publish(
 @router.get("/schedule/{clip_id}", response_model=List[PublishLogScheduledInfo])
 async def get_scheduled_publications(
     clip_id: str,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    _auth: dict = Depends(require_role("admin", "manager", "operator"))
 ):
     """
     Get all scheduled publications for a clip.
@@ -70,7 +73,8 @@ async def get_scheduled_publications(
 @router.post("/scheduler/tick", response_model=SchedulerTickResponse)
 async def execute_scheduler_tick(
     dry_run: bool = Query(default=False, description="If true, only count without modifying"),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    _auth: dict = Depends(require_role("admin", "manager", "operator"))
 ):
     """
     Execute scheduler tick: move due scheduled logs to pending status.

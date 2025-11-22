@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
 from app.publishing_engine.models import PublishRequest, PublishResult, PublishLogResponse
 from app.publishing_engine.service import publish_clip, get_publish_logs_for_clip
+from app.auth.permissions import require_role
 
 
 router = APIRouter()
@@ -15,7 +16,8 @@ router = APIRouter()
 @router.post("/publish", response_model=PublishResult)
 async def publish_clip_endpoint(
     request: PublishRequest,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    _auth: dict = Depends(require_role("admin", "manager"))
 ):
     """
     Publish a clip to a social platform.
@@ -57,7 +59,8 @@ async def publish_clip_endpoint(
 @router.get("/logs/{clip_id}", response_model=list[PublishLogResponse])
 async def get_publish_logs_endpoint(
     clip_id: UUID,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    _auth: dict = Depends(require_role("admin", "manager", "operator"))
 ):
     """
     Get all publish logs for a specific clip.

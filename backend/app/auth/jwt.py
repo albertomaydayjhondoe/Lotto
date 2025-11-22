@@ -7,6 +7,7 @@ Handles access tokens (15 min) and refresh tokens (30 days).
 from datetime import datetime, timedelta
 from typing import Optional
 import jwt
+from jwt.exceptions import InvalidTokenError
 from uuid import uuid4
 
 # Secret keys (in production, load from environment variables)
@@ -89,7 +90,7 @@ def decode_access_token(token: str) -> Optional[dict]:
         return payload
     except jwt.ExpiredSignatureError:
         return None
-    except jwt.JWTError:
+    except InvalidTokenError:
         return None
 
 
@@ -113,7 +114,7 @@ def decode_refresh_token(token: str) -> Optional[dict]:
         return payload
     except jwt.ExpiredSignatureError:
         return None
-    except jwt.JWTError:
+    except InvalidTokenError:
         return None
 
 
@@ -133,5 +134,5 @@ def get_token_expiry(token: str) -> Optional[datetime]:
         if exp_timestamp:
             return datetime.fromtimestamp(exp_timestamp)
         return None
-    except jwt.JWTError:
+    except InvalidTokenError:
         return None

@@ -12,13 +12,15 @@ from uuid import uuid4
 from app.models.schemas import PlatformRules as PlatformRulesSchema, PlatformRulesCreate
 from app.models.database import PlatformRule, RuleStatus
 from app.core.database import get_db
+from app.auth.permissions import require_role
 
 router = APIRouter()
 
 
 @router.get("/rules", response_model=List[PlatformRulesSchema])
 async def get_rules(
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    _auth: dict = Depends(require_role("admin", "manager"))
 ):
     """
     Get active platform rules.
@@ -42,7 +44,8 @@ async def get_rules(
 @router.post("/rules", response_model=PlatformRulesSchema, status_code=202)
 async def create_rule_proposal(
     rule_data: PlatformRulesCreate,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    _auth: dict = Depends(require_role("admin", "manager"))
 ):
     """
     Propose rule changes (creates a candidate ruleset requiring approval).

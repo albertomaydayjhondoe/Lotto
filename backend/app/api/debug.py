@@ -15,6 +15,7 @@ from app.models.database import Job, JobStatus, Clip, ClipStatus, VideoAsset
 from app.core.logging import get_logger
 from app.ledger import get_recent_events, get_total_events
 from app.ledger.models import LedgerEvent
+from app.auth.permissions import require_role
 
 router = APIRouter()
 logger = get_logger(__name__)
@@ -22,7 +23,8 @@ logger = get_logger(__name__)
 
 @router.get("/jobs/summary")
 async def get_jobs_summary(
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    _auth: dict = Depends(require_role("admin"))
 ) -> Dict[str, Any]:
     """
     Get summary of jobs by status.
@@ -81,7 +83,8 @@ async def get_jobs_summary(
 
 @router.get("/clips/summary")
 async def get_clips_summary(
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    _auth: dict = Depends(require_role("admin"))
 ) -> Dict[str, Any]:
     """
     Get summary of clips by status.
@@ -140,7 +143,8 @@ async def get_clips_summary(
 
 @router.get("/health")
 async def health_check(
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    _auth: dict = Depends(require_role("admin"))
 ) -> Dict[str, str]:
     """
     Health check endpoint.
@@ -182,7 +186,8 @@ async def health_check(
 @router.get("/ledger/recent")
 async def get_ledger_recent(
     limit: int = 50,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    _auth: dict = Depends(require_role("admin"))
 ):
     """
     Get recent ledger events.

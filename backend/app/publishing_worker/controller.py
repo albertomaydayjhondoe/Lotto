@@ -9,12 +9,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.publishing_worker import run_publishing_worker_once
+from app.auth.permissions import require_role
 
 router = APIRouter()
 
 
 @router.post("/worker/process_once")
-async def process_once(db: AsyncSession = Depends(get_db)):
+async def process_once(
+    db: AsyncSession = Depends(get_db),
+    _auth: dict = Depends(require_role("admin", "manager", "operator"))
+):
     """
     Manually trigger processing of one pending log from the queue.
     

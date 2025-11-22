@@ -11,6 +11,7 @@ from datetime import datetime
 from app.models.schemas import ConfirmPublishRequest, ConfirmPublishResponse
 from app.models.database import Clip, Publication, ClipStatus, Job, JobStatus
 from app.core.database import get_db
+from app.auth.permissions import require_role
 
 router = APIRouter()
 
@@ -18,7 +19,8 @@ router = APIRouter()
 @router.post("/confirm_publish", response_model=ConfirmPublishResponse)
 async def confirm_publish(
     request: ConfirmPublishRequest,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    _auth: dict = Depends(require_role("admin", "manager"))
 ):
     """
     Manual confirmation that a clip was published on the official account.

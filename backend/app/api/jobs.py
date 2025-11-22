@@ -15,6 +15,7 @@ from app.models.database import Job, JobStatus
 from app.core.database import get_db
 from app.services.job_worker import run_job
 from app.worker import process_single_job
+from app.auth.permissions import require_role
 
 router = APIRouter()
 
@@ -22,7 +23,8 @@ router = APIRouter()
 @router.post("/jobs", response_model=JobSchema, status_code=201)
 async def create_job(
     job_data: JobCreate,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    _auth: dict = Depends(require_role("admin", "manager", "operator"))
 ):
     """
     Create a new ad-hoc job.
@@ -76,7 +78,8 @@ async def create_job(
 async def list_jobs(
     status: Optional[str] = Query(None),
     created_by: Optional[str] = Query(None),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    _auth: dict = Depends(require_role("admin", "manager", "operator"))
 ):
     """
     List all jobs with optional filters.
@@ -103,7 +106,8 @@ async def list_jobs(
 @router.get("/jobs/{id}", response_model=JobSchema)
 async def get_job(
     id: UUID,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    _auth: dict = Depends(require_role("admin", "manager", "operator"))
 ):
     """
     Get a specific job by ID.
@@ -131,7 +135,8 @@ async def get_job(
 
 @router.post("/jobs/process")
 async def process_next_job(
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    _auth: dict = Depends(require_role("admin", "manager", "operator"))
 ):
     """
     Process the next available job from the queue (DEV ONLY).
@@ -162,7 +167,8 @@ async def process_next_job(
 @router.post("/jobs/{id}/process")
 async def process_job_by_id(
     id: UUID,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    _auth: dict = Depends(require_role("admin", "manager", "operator"))
 ):
     """
     Process a specific job by ID (DEPRECATED - use POST /jobs/process).

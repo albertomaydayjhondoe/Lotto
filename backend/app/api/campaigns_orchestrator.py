@@ -13,6 +13,7 @@ from app.campaigns_engine.schemas import (
     OrchestrateCampaignResponse,
     BestClipDecision,
 )
+from app.auth.permissions import require_role
 
 
 router = APIRouter(prefix="/campaigns")
@@ -22,6 +23,7 @@ router = APIRouter(prefix="/campaigns")
 async def orchestrate_campaigns(
     request: OrchestrateCampaignRequest,
     db: AsyncSession = Depends(get_db),
+    _auth: dict = Depends(require_role("admin", "manager"))
 ):
     """
     Orchestrate campaigns for a video asset.
@@ -71,6 +73,7 @@ async def get_best_clip(
     video_asset_id: UUID,
     platform: str,
     db: AsyncSession = Depends(get_db),
+    _auth: dict = Depends(require_role("admin", "manager"))
 ):
     """
     Get the best clip decision for a video asset and platform.

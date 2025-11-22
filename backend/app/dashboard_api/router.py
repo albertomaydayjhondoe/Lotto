@@ -23,6 +23,7 @@ from .service import (
     get_platform_stats,
     get_campaign_stats
 )
+from app.auth.permissions import require_role
 
 
 router = APIRouter()
@@ -39,7 +40,10 @@ router = APIRouter()
     - Publication logs summary (success, failed, scheduled)
     """
 )
-async def overview_stats_endpoint(db: AsyncSession = Depends(get_db)) -> OverviewStats:
+async def overview_stats_endpoint(
+    db: AsyncSession = Depends(get_db),
+    _auth: dict = Depends(require_role("admin", "manager", "operator", "viewer"))
+) -> OverviewStats:
     """Get global system statistics overview."""
     return await get_overview_stats(db)
 
@@ -55,7 +59,10 @@ async def overview_stats_endpoint(db: AsyncSession = Depends(get_db)) -> Overvie
     - Age of oldest pending item in seconds
     """
 )
-async def queue_stats_endpoint(db: AsyncSession = Depends(get_db)) -> QueueStats:
+async def queue_stats_endpoint(
+    db: AsyncSession = Depends(get_db),
+    _auth: dict = Depends(require_role("admin", "manager", "operator", "viewer"))
+) -> QueueStats:
     """Get publication queue statistics."""
     return await get_queue_stats(db)
 
@@ -72,7 +79,10 @@ async def queue_stats_endpoint(db: AsyncSession = Depends(get_db)) -> QueueStats
     - Number of active workers
     """
 )
-async def orchestrator_stats_endpoint(db: AsyncSession = Depends(get_db)) -> OrchestratorStats:
+async def orchestrator_stats_endpoint(
+    db: AsyncSession = Depends(get_db),
+    _auth: dict = Depends(require_role("admin", "manager", "operator", "viewer"))
+) -> OrchestratorStats:
     """Get orchestrator activity metrics."""
     return await get_orchestrator_stats(db)
 
@@ -89,7 +99,10 @@ async def orchestrator_stats_endpoint(db: AsyncSession = Depends(get_db)) -> Orc
     - Job success and failure counts per platform
     """
 )
-async def platform_stats_endpoint(db: AsyncSession = Depends(get_db)) -> PlatformStats:
+async def platform_stats_endpoint(
+    db: AsyncSession = Depends(get_db),
+    _auth: dict = Depends(require_role("admin", "manager", "operator", "viewer"))
+) -> PlatformStats:
     """Get platform-specific statistics."""
     return await get_platform_stats(db)
 
@@ -104,6 +117,9 @@ async def platform_stats_endpoint(db: AsyncSession = Depends(get_db)) -> Platfor
     - Total budget spent across all campaigns
     """
 )
-async def campaign_stats_endpoint(db: AsyncSession = Depends(get_db)) -> CampaignStats:
+async def campaign_stats_endpoint(
+    db: AsyncSession = Depends(get_db),
+    _auth: dict = Depends(require_role("admin", "manager", "operator", "viewer"))
+) -> CampaignStats:
     """Get campaign status summary."""
     return await get_campaign_stats(db)

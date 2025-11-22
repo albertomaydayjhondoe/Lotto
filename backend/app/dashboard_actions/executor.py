@@ -21,7 +21,7 @@ from app.publishing_engine.service import publish_clip
 from app.publishing_engine.models import PublishRequest
 from app.publishing_scheduler.scheduler import schedule_publication
 from app.publishing_scheduler.models import ScheduleRequest
-from app.orchestrator.orchestrator_service import run_orchestrator_tick as orchestrator_tick
+from app.orchestrator.runner import run_orchestrator_once
 from app.ledger import log_event
 
 
@@ -179,7 +179,7 @@ async def _action_retry_failed(payload: Dict[str, Any], db: AsyncSession) -> Dic
 
 async def _action_run_orchestrator(payload: Dict[str, Any], db: AsyncSession) -> Dict[str, Any]:
     """Run orchestrator tick manually."""
-    result = await orchestrator_tick(db)
+    result = await run_orchestrator_once()
     
     return {
         "message": "Orchestrator tick completed",

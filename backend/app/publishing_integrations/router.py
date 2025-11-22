@@ -5,12 +5,13 @@ Provides endpoints to query available providers, their capabilities,
 and validate post parameters without making actual API calls.
 """
 from typing import Dict, Any, List
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
 
 from app.publishing_integrations.instagram_client import InstagramPublishingClient
 from app.publishing_integrations.tiktok_client import TikTokPublishingClient
 from app.publishing_integrations.youtube_client import YouTubePublishingClient
+from app.auth.permissions import require_role
 
 
 router = APIRouter()
@@ -49,7 +50,9 @@ PROVIDERS = {
 
 
 @router.get("/providers", response_model=List[str])
-async def list_providers():
+async def list_providers(
+    _auth: dict = Depends(require_role("admin", "manager"))
+):
     """
     Get list of available publishing providers.
     
@@ -60,7 +63,10 @@ async def list_providers():
 
 
 @router.get("/providers/{platform}", response_model=ProviderInfo)
-async def get_provider_details(platform: str):
+async def get_provider_details(
+    platform: str,
+    _auth: dict = Depends(require_role("admin", "manager"))
+):
     """
     Get detailed information about a specific provider.
     
@@ -90,7 +96,10 @@ async def get_provider_details(platform: str):
 
 
 @router.post("/validate", response_model=ValidationResponse)
-async def validate_post_params(request: ValidationRequest):
+async def validate_post_params(
+    request: ValidationRequest,
+    _auth: dict = Depends(require_role("admin", "manager"))
+):
     """
     Validate post parameters for a specific platform.
     

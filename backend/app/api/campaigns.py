@@ -12,6 +12,7 @@ from uuid import uuid4
 from app.models.schemas import Campaign as CampaignSchema, CampaignCreate
 from app.models.database import Campaign, Clip, CampaignStatus
 from app.core.database import get_db
+from app.auth.permissions import require_role
 
 router = APIRouter()
 
@@ -19,7 +20,8 @@ router = APIRouter()
 @router.post("/campaigns", response_model=CampaignSchema, status_code=201)
 async def create_campaign(
     campaign_data: CampaignCreate,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    _auth: dict = Depends(require_role("admin", "manager"))
 ):
     """
     Create or preview a campaign.
@@ -62,7 +64,8 @@ async def create_campaign(
 
 @router.get("/campaigns", response_model=List[CampaignSchema])
 async def list_campaigns(
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    _auth: dict = Depends(require_role("admin", "manager"))
 ):
     """
     List all campaigns.

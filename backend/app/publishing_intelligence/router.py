@@ -17,6 +17,7 @@ from app.publishing_intelligence.intelligence import (
     get_global_forecast,
     calculate_priority
 )
+from app.auth.permissions import require_role
 
 
 router = APIRouter()
@@ -25,7 +26,8 @@ router = APIRouter()
 @router.post("/auto-schedule", response_model=AutoScheduleResponse)
 async def auto_schedule_endpoint(
     request: AutoScheduleRequest,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    _auth: dict = Depends(require_role("admin", "manager"))
 ):
     """
     Auto-schedule a clip using intelligence layer
@@ -77,7 +79,10 @@ async def auto_schedule_endpoint(
 
 
 @router.get("/forecast", response_model=GlobalForecast)
-async def get_forecast_endpoint(db: AsyncSession = Depends(get_db)):
+async def get_forecast_endpoint(
+    db: AsyncSession = Depends(get_db),
+    _auth: dict = Depends(require_role("admin", "manager", "operator"))
+):
     """
     Get global forecast for all platforms
     
@@ -132,7 +137,8 @@ async def get_forecast_endpoint(db: AsyncSession = Depends(get_db)):
 async def get_priority_endpoint(
     clip_id: str,
     platform: str = "instagram",
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    _auth: dict = Depends(require_role("admin", "manager", "operator"))
 ):
     """
     Calculate priority for a specific clip

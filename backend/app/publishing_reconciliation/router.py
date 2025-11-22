@@ -10,6 +10,7 @@ from typing import Dict, Any
 
 from app.core.database import get_db
 from app.publishing_reconciliation import reconcile_publications
+from app.auth.permissions import require_role
 
 router = APIRouter()
 
@@ -17,7 +18,8 @@ router = APIRouter()
 @router.post("/reconcile")
 async def reconcile_endpoint(
     since_minutes: int = Query(default=10, ge=1, le=1440, description="Look back period in minutes"),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    _auth: dict = Depends(require_role("admin", "manager", "operator"))
 ) -> Dict[str, Any]:
     """
     Manually trigger publication reconciliation.

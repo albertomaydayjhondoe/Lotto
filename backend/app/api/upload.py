@@ -16,6 +16,7 @@ from app.models.database import VideoAsset, Job, JobStatus
 from app.core.database import get_db
 from app.core.config import settings
 from app.ledger import log_event, log_job_event
+from app.auth.permissions import require_role
 
 router = APIRouter()
 
@@ -30,7 +31,8 @@ async def upload_video(
     description: str = Form(None),
     release_date: str = Form(None),
     idempotency_key: str = Form(None),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    _auth: dict = Depends(require_role("admin", "manager"))
 ):
     """
     Upload a full video clip and create initial cut_analysis job.

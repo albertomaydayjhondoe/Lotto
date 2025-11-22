@@ -12,6 +12,7 @@ from uuid import uuid4, UUID
 from app.models.schemas import Clip as ClipSchema, ClipVariantsRequest, Job as JobSchema
 from app.models.database import Clip, Job, JobStatus
 from app.core.database import get_db
+from app.auth.permissions import require_role
 
 router = APIRouter()
 
@@ -20,7 +21,8 @@ router = APIRouter()
 async def list_clips(
     status: Optional[str] = Query(None),
     min_visual_score: Optional[float] = Query(None),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    _auth: dict = Depends(require_role("admin", "manager", "operator"))
 ):
     """
     List clips with optional filters.
@@ -51,7 +53,8 @@ async def list_clips(
 async def create_clip_variants(
     id: UUID,
     request: ClipVariantsRequest,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    _auth: dict = Depends(require_role("admin", "manager", "operator"))
 ):
     """
     Request variant generation for a clip.

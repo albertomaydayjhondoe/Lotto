@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
 from app.rules_engine import RuleEngine
 from app.rules_engine.models import AdaptiveRuleSet
+from app.auth.permissions import require_role
 
 
 router = APIRouter()
@@ -44,7 +45,8 @@ class RuleWeightsResponse(BaseModel):
 @router.get("/engine/weights", response_model=RuleWeightsResponse)
 async def get_rule_weights(
     platform: Literal["tiktok", "instagram", "youtube"],
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    _auth: dict = Depends(require_role("admin", "manager"))
 ):
     """
     Get current rule weights for a platform.
@@ -76,7 +78,8 @@ async def get_rule_weights(
 @router.post("/engine/evaluate", response_model=EvaluateClipResponse)
 async def evaluate_clip(
     request: EvaluateClipRequest,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    _auth: dict = Depends(require_role("admin", "manager"))
 ):
     """
     Evaluate a clip for a specific platform.
@@ -117,7 +120,8 @@ async def evaluate_clip(
 @router.post("/engine/train", response_model=RuleWeightsResponse)
 async def train_rules(
     request: TrainRulesRequest,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    _auth: dict = Depends(require_role("admin"))
 ):
     """
     Train rule weights based on performance data.
