@@ -5,13 +5,18 @@ This module provides the glue between SocialAccountModel (with encrypted credent
 and platform-specific publishing clients.
 
 PASO 5.2: SocialAccount + Credentials → Provider Client binding
+PASO 5.4: Added OAuth token refresh before client construction
 """
+import logging
 from typing import Dict, Any, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.database import SocialAccountModel
 from app.services.social_accounts import get_account_credentials
 from app.publishing_integrations.base_client import BasePublishingClient
+from app.oauth_service import ensure_valid_access_token
+
+logger = logging.getLogger(__name__)
 
 
 class AccountCredentialsError(Exception):
@@ -32,10 +37,11 @@ async def get_provider_client_for_account(
     Get a configured provider client for a social account.
     
     This function:
-    1. Retrieves encrypted credentials from the account
-    2. Decrypts credentials using the secure credentials service
-    3. Maps account fields + credentials to provider-specific config
-    4. Returns an initialized provider client ready to use
+    1. Ensures OAuth access token is valid (refreshes if needed) - PASO 5.4
+    2. Retrieves encrypted credentials from the account
+    3. Decrypts credentials using the secure credentials service
+    4. Maps account fields + credentials to provider-specific config
+    5. Returns an initialized provider client ready to use
     
     Args:
         db: Database session
@@ -60,6 +66,23 @@ async def get_provider_client_for_account(
     from app.publishing_integrations.instagram_client import InstagramPublishingClient
     from app.publishing_integrations.tiktok_client import TikTokPublishingClient
     from app.publishing_integrations.youtube_client import YouTubePublishingClient
+    
+    # Step 0: Ensure OAuth access token is valid (PASO 5.4)
+    # This will automatically refresh the token if it's expired or close to expiration
+    account, refresh_result = await ensure_valid_access_token(db, account)
+    
+    if refresh_result:
+        if refresh_result.success:
+            logger.info(
+                f"OAuth token refreshed for account {account.id} ({refresh_result.provider}). "
+                f"New expiration: {refresh_result.new_expires_at}"
+            )
+        else:
+            logger.warning(
+                f"Failed to refresh OAuth token for account {account.id} "
+                f"({refresh_result.provider}): {refresh_result.reason}. "
+                f"Continuing with existing token..."
+            )
     
     # Step 1: Retrieve and decrypt credentials
     creds = await get_account_credentials(db, account.id)

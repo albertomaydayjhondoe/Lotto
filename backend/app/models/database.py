@@ -239,6 +239,13 @@ class SocialAccountModel(Base):
     credentials_version = Column(String(50), nullable=True)  # Encryption format version (e.g., "fernet-v1")
     credentials_updated_at = Column(DateTime, nullable=True)  # Last credentials update timestamp
     
+    # OAuth tokens infrastructure (PASO 5.4)
+    oauth_provider = Column(String(50), nullable=True)  # "instagram", "tiktok", "youtube", or other OAuth provider
+    oauth_access_token = Column(Text, nullable=True)  # OAuth access token (can also use encrypted_credentials)
+    oauth_refresh_token = Column(Text, nullable=True)  # OAuth refresh token for automatic renewal
+    oauth_expires_at = Column(DateTime, nullable=True)  # UTC timestamp when access token expires
+    oauth_scopes = Column(JSON, nullable=True)  # List of granted OAuth scopes (e.g., ["instagram_basic", "instagram_content_publish"])
+    
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     
