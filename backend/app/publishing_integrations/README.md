@@ -488,3 +488,268 @@ Para agregar una nueva plataforma:
 **Última actualización:** Noviembre 2025  
 **Versión:** 3.0.0-stub  
 **Estado:** Ready for API keys 🔐
+
+---
+
+## 🔗 PASO 5.2: Vinculación de SocialAccount + Credenciales con Provider Clients
+
+### Descripción
+
+A partir de **PASO 5.2**, se añadió una capa de binding que conecta automáticamente:
+- **SocialAccountModel** (almacenamiento de cuentas sociales en DB)
+- **Sistema de credenciales cifradas** (PASO 5.1)
+- **Provider clients** (Instagram/TikTok/YouTube)
+
+Esto permite obtener un cliente configurado directamente desde una cuenta social, sin necesidad de construir manualmente la configuración.
+
+### Función Principal: `get_provider_client_for_account`
+
+**Ubicación:** `app/publishing_integrations/account_binding.py`
+
+**Firma:**
+```python
+async def get_provider_client_for_account(
+    db: AsyncSession,
+    account: SocialAccountModel
+) -> BasePublishingClient
+```
+
+**Funcionalidad:**
+1. Recupera y descifra credenciales de la cuenta usando `get_account_credentials()`
+2. Detecta la plataforma (`instagram`, `tiktok`, `youtube`)
+3. Mapea campos de `account` + `credentials` a configuración específica de plataforma
+4. Retorna un cliente inicializado y listo para usar
+
+**Excepciones:**
+- `AccountCredentialsError`: Si la cuenta no tiene credenciales configuradas
+- `UnsupportedPlatformError`: Si la plataforma no está soportada
+
+### Mapping de Credenciales por Plataforma
+
+#### Instagram
+```python
+config = {
+    "access_token": creds["access_token"],
+    "instagram_account_id": account.external_id or creds["instagram_account_id"],
+    "facebook_page_id": creds.get("facebook_page_id"),  # opcional
+    "account_handle": account.handle,
+    "account_id": str(account.id)
+}
+```
+
+**Campos requeridos:**
+- `access_token`: Instagram Graph API access token
+- `instagram_account_id`: ID de Instagram Business Account
+
+#### TikTok
+```python
+config = {
+    "client_key": creds["client_key"],
+    "client_secret": creds["client_secret"],
+    "access_token": creds["access_token"],
+    "open_id": account.external_id or creds.get("open_id"),  # opcional
+    "refresh_token": creds.get("refresh_token"),  # opcional
+    "account_handle": account.handle,
+    "account_id": str(account.id)
+}
+```
+
+**Campos requeridos:**
+- `client_key`: TikTok app client key
+- `client_secret`: TikTok app client secret
+- `access_token`: User access token
+
+#### YouTube
+```python
+config = {
+    "client_id": creds["client_id"],
+    "client_secret": creds["client_secret"],
+    "refresh_token": creds["refresh_token"],
+    "channel_id": account.external_id or creds.get("channel_id"),  # opcional
+    "access_token": creds.get("access_token"),  # opcional
+    "account_handle": account.handle,
+    "account_id": str(account.id)
+}
+```
+
+**Campos requeridos:**
+- `client_id`: Google OAuth client ID
+- `client_secret`: Google OAuth client secret
+- `refresh_token`: YouTube OAuth refresh token
+
+### Ejemplo de Uso Completo
+
+```python
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.models.database import SocialAccountModel
+from app.services.social_accounts import set_account_credentials
+from app.publishing_integrations import get_provider_client_for_account
+
+async def setup_and_publish(db: AsyncSession):
+    # 1. Crear cuenta social (una sola vez, típicamente desde admin panel)
+    account = SocialAccountModel(
+        platform="instagram",
+        handle="@stakazo.oficial",
+        external_id="123456789",  # Instagram Business Account ID
+        is_main_account=1,
+        is_active=1
+    )
+    db.add(account)
+    await db.commit()
+    await db.refresh(account)
+    
+    # 2. Configurar credenciales cifradas (una sola vez, desde admin panel)
+    await set_account_credentials(
+        db=db,
+        account_id=account.id,
+        creds={
+            "access_token": "IGQVJXa1b2c3d4e5f6g7h8...",
+            "instagram_account_id": "123456789",
+            "facebook_page_id": "987654321"
+        }
+    )
+    
+    # 3. En runtime: obtener cliente configurado (cada vez que se publica)
+    client = await get_provider_client_for_account(db, account)
+    
+    # 4. Usar cliente para publicar
+    await client.authenticate()
+    
+    upload_result = await client.upload_video(
+        file_path="/storage/clips/video_123.mp4",
+        caption="¡Nuevo video! #stakazo #ai",
+        cover_url="https://cdn.stakazo.com/covers/video_123.jpg"
+    )
+    
+    publish_result = await client.publish_post(
+        video_id=upload_result["video_id"],
+        caption="¡Nuevo video! #stakazo #ai"
+    )
+    
+    print(f"✅ Published to Instagram: {publish_result['post_url']}")
+```
+
+### Ventajas de este Enfoque
+
+1. **Separación de Responsabilidades:**
+   - `SocialAccountModel`: Gestión de cuentas (admin, UI)
+   - Sistema de credenciales: Seguridad y cifrado
+   - Account binding: Mapeo automático
+   - Provider clients: Lógica de APIs
+
+2. **Seguridad:**
+   - Credenciales siempre cifradas en DB
+   - Solo se descifran en memoria cuando se necesitan
+   - No hay credenciales en código fuente
+
+3. **Flexibilidad:**
+   - Múltiples cuentas por plataforma
+   - Diferentes credenciales para dev/staging/prod
+   - Rotación de credenciales sin cambiar código
+
+4. **Mantenibilidad:**
+   - Cambios en formato de credenciales → solo actualizar `_build_*_config()`
+   - Nuevas plataformas → añadir función `_build_*_config()`
+   - No afecta al resto del sistema
+
+### Testing
+
+Tests completos en: `backend/tests/test_publishing_providers_binding.py`
+
+**Tests implementados:**
+1. ✅ `test_get_provider_client_for_account_instagram_ok`
+2. ✅ `test_get_provider_client_for_account_tiktok_ok`
+3. ✅ `test_get_provider_client_for_account_youtube_ok`
+4. ✅ `test_get_provider_client_for_account_without_credentials_raises`
+5. ✅ `test_get_provider_client_for_account_unsupported_platform`
+6. ✅ `test_get_provider_client_instagram_uses_external_id_fallback`
+7. ✅ `test_get_provider_client_platform_case_insensitive`
+8. ✅ `test_provider_client_authentication_flow`
+
+**Ejecutar tests:**
+```bash
+pytest backend/tests/test_publishing_providers_binding.py -v
+```
+
+### Excepciones Personalizadas
+
+#### AccountCredentialsError
+```python
+from app.publishing_integrations import AccountCredentialsError
+
+# Raised when account has no credentials
+try:
+    client = await get_provider_client_for_account(db, account)
+except AccountCredentialsError as e:
+    print(f"Configure credentials first: {e}")
+    # Redirect to admin panel to add credentials
+```
+
+#### UnsupportedPlatformError
+```python
+from app.publishing_integrations import UnsupportedPlatformError
+
+# Raised when platform is not recognized
+try:
+    client = await get_provider_client_for_account(db, account)
+except UnsupportedPlatformError as e:
+    print(f"Platform not available: {e}")
+    # Show list of supported platforms
+```
+
+### Validación de Configuración
+
+Función helper opcional para validar que la configuración tiene todos los campos requeridos:
+
+```python
+from app.publishing_integrations.account_binding import validate_config
+
+config = {
+    "access_token": "IG_TOKEN",
+    "instagram_account_id": "123456"
+}
+
+try:
+    validate_config("instagram", config)
+    print("✅ Configuration valid")
+except ValueError as e:
+    print(f"❌ Invalid config: {e}")
+```
+
+### Flujo de Integración con Publishing Engine
+
+**Futuro (PASO 5.3+):** El publishing engine usará este binding así:
+
+```python
+# En app/publishing_engine/service.py
+
+async def publish_clip_to_platform(
+    db: AsyncSession,
+    clip: Clip,
+    platform: str,
+    social_account_id: UUID
+):
+    # 1. Obtener cuenta social
+    account = await db.get(SocialAccountModel, social_account_id)
+    
+    # 2. Obtener cliente configurado (PASO 5.2)
+    client = await get_provider_client_for_account(db, account)
+    
+    # 3. Autenticar
+    await client.authenticate()
+    
+    # 4. Publicar
+    result = await client.upload_video(clip.file_path, caption=clip.caption)
+    await client.publish_post(result["video_id"])
+    
+    # 5. Actualizar PublishLog
+    publish_log.status = "success"
+    publish_log.external_post_id = result["post_id"]
+    publish_log.external_url = result["post_url"]
+    await db.commit()
+```
+
+---
+
+**PASO 5.2 Completado:** Account binding implementado y testeado ✅  
+**Próximo paso:** Integrar con publishing engine y worker

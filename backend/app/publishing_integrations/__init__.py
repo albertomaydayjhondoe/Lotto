@@ -5,6 +5,8 @@ This module provides real API client structures for social media platforms
 (Instagram, TikTok, YouTube) without requiring actual credentials.
 
 Current status: STUB implementations ready for API key integration.
+
+PASO 5.2: Added account binding layer to connect SocialAccount + credentials with providers.
 """
 from app.publishing_integrations.base_client import BasePublishingClient
 from app.publishing_integrations.instagram_client import InstagramPublishingClient
@@ -14,6 +16,12 @@ from app.publishing_integrations.exceptions import (
     PublishingAuthError,
     PublishingUploadError,
     PublishingPostError
+)
+from app.publishing_integrations.account_binding import (
+    get_provider_client_for_account,
+    AccountCredentialsError,
+    UnsupportedPlatformError,
+    validate_config
 )
 from app.publishing_integrations.router import router
 
@@ -68,10 +76,16 @@ __all__ = [
     "PublishingAuthError",
     "PublishingUploadError",
     "PublishingPostError",
+    "AccountCredentialsError",
+    "UnsupportedPlatformError",
     
     # Factory
     "get_provider_client",
     "AVAILABLE_PROVIDERS",
+    
+    # Account Binding (PASO 5.2)
+    "get_provider_client_for_account",
+    "validate_config",
     
     # Router
     "router",
