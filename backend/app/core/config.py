@@ -61,6 +61,10 @@ class Settings(BaseSettings):
     # Live Telemetry Configuration (PASO 6.4)
     TELEMETRY_INTERVAL_SECONDS: int = 3  # seconds between telemetry broadcasts
     
+    # AI Global Worker Configuration (PASO 7.0)
+    AI_WORKER_ENABLED: bool = True  # enable AI global worker
+    AI_WORKER_INTERVAL_SECONDS: int = 30  # seconds between AI reasoning cycles
+    
     # Security / Credentials Encryption (PASO 5.1)
     CREDENTIALS_ENCRYPTION_KEY: str | None = None  # Fernet key for encrypting social account credentials
     

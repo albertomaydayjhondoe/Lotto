@@ -27,6 +27,7 @@ from app.alerting_engine import router as alerting_router
 from app.alerting_engine.websocket import alert_manager
 from app.alerting_engine.engine import analyze_system_state
 from app.auth import auth_router
+from app.ai_global_worker import ai_global_router, start_ai_worker_loop, stop_ai_worker_loop
 from app.core.config import settings
 from app.core.database import init_db, get_db
 
@@ -105,6 +106,14 @@ async def lifespan(app: FastAPI):
     # Start alert analysis background task
     alert_task = asyncio.create_task(alert_analysis_loop())
     
+    # Start AI Global Worker if enabled
+    ai_worker_task = None
+    if settings.AI_WORKER_ENABLED:
+        ai_worker_task = await start_ai_worker_loop(
+            db_factory=get_db,
+            interval_seconds=settings.AI_WORKER_INTERVAL_SECONDS
+        )
+    
     yield
     
     # Shutdown
@@ -118,6 +127,13 @@ async def lifespan(app: FastAPI):
     # Cancel alert task
     alert_task.cancel()
     try:
+        await alert_task
+    except asyncio.CancelledError:
+        pass
+    
+    # Stop AI Worker
+    if ai_worker_task:
+        await stop_ai_worker_loop()
         await alert_task
     except asyncio.CancelledError:
         pass
@@ -198,6 +214,9 @@ app.include_router(alerting_router, tags=["alerting"])
 
 # Auth endpoints (PASO 6.6)
 app.include_router(auth_router, tags=["auth"])
+
+# AI Global Worker endpoints (PASO 7.0)
+app.include_router(ai_global_router, tags=["ai_global_worker"])
 
 # Debug endpoints (DEVELOPMENT ONLY)
 # WARNING: In production, these endpoints should be protected with authentication
