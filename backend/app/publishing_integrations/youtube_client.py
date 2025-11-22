@@ -44,6 +44,27 @@ class YouTubePublishingClient(BasePublishingClient):
     def platform_name(self) -> str:
         return "youtube"
     
+    def supports_real_api(self) -> bool:
+        """
+        Check if YouTube client has required credentials for real API calls.
+        
+        Required:
+        - client_id: OAuth 2.0 client ID
+        - client_secret: OAuth 2.0 client secret
+        - access_token: OAuth access token
+        
+        Optional but recommended:
+        - refresh_token: For automatic token refresh
+        
+        Returns:
+            bool: True if all required credentials present
+        """
+        client_id = self.config.get("client_id")
+        client_secret = self.config.get("client_secret")
+        access_token = self.config.get("access_token")
+        
+        return bool(client_id and client_secret and access_token)
+    
     async def authenticate(self) -> bool:
         """
         Authenticate with YouTube Data API.

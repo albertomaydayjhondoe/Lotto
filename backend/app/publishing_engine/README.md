@@ -207,6 +207,34 @@ The Publishing Engine logs all operations to the SocialSyncLedger for audit trai
 }
 ```
 
+### publish_provider_ready
+```json
+{
+  "event_type": "publish_provider_ready",
+  "entity_type": "clip",
+  "entity_id": "550e8400-e29b-41d4-a716-446655440000",
+  "metadata": {
+    "platform": "instagram",
+    "provider": "instagram",
+    "publish_log_id": "770e8400-e29b-41d4-a716-446655440002"
+  }
+}
+```
+
+### publish_provider_fallback
+```json
+{
+  "event_type": "publish_provider_fallback",
+  "entity_type": "clip",
+  "entity_id": "550e8400-e29b-41d4-a716-446655440000",
+  "metadata": {
+    "platform": "instagram",
+    "reason": "incomplete_config",
+    "publish_log_id": "770e8400-e29b-41d4-a716-446655440002"
+  }
+}
+```
+
 ### publish_successful
 ```json
 {
@@ -235,6 +263,164 @@ The Publishing Engine logs all operations to the SocialSyncLedger for audit trai
   }
 }
 ```
+
+## Provider Client Integration Flow (PASO 5.3)
+
+Starting from PASO 5.3, the Publishing Engine intelligently chooses between **simulators** and **real provider clients** based on whether encrypted credentials exist for a social account.
+
+### Architecture
+
+```
+publish_clip() Flow:
+┌─────────────────────────────────────┐
+│ 1. Validate Clip + Social Account  │
+└──────────────┬──────────────────────┘
+               │
+               ▼
+┌─────────────────────────────────────┐
+│ 2. Check if credentials exist       │
+│    get_account_credentials(db, id)  │
+└──────────────┬──────────────────────┘
+               │
+         ┌─────┴─────┐
+         │           │
+    ✅ Has Creds   ❌ No Creds
+         │           │
+         ▼           ▼
+    ┌─────────┐   ┌──────────┐
+    │Provider │   │Simulator │
+    │ Client  │   │  (stub)  │
+    └─────────┘   └──────────┘
+         │           │
+         └─────┬─────┘
+               ▼
+    ┌──────────────────────┐
+    │ 3. Execute Publish   │
+    │    (stub mode)       │
+    └──────────────────────┘
+```
+
+### supports_real_api() Method
+
+Each provider client implements `supports_real_api()` to validate if all required credentials are present:
+
+**Instagram:**
+```python
+def supports_real_api(self) -> bool:
+    access_token = self.config.get("access_token")
+    instagram_account_id = self.config.get("instagram_account_id")
+    return bool(access_token and instagram_account_id)
+```
+
+**TikTok:**
+```python
+def supports_real_api(self) -> bool:
+    client_key = self.config.get("client_key")
+    client_secret = self.config.get("client_secret")
+    access_token = self.config.get("access_token")
+    return bool(client_key and client_secret and access_token)
+```
+
+**YouTube:**
+```python
+def supports_real_api(self) -> bool:
+    client_id = self.config.get("client_id")
+    client_secret = self.config.get("client_secret")
+    access_token = self.config.get("access_token")
+    return bool(client_id and client_secret and access_token)
+```
+
+### Fallback Logic
+
+The engine gracefully falls back to simulators in these scenarios:
+
+1. **No credentials stored** → Use simulator
+2. **Incomplete credentials** (e.g., missing access_token) → Use simulator
+3. **Credential decryption error** → Use simulator
+4. **Unsupported platform** → Use simulator
+
+All fallback events are logged to ledger with event type `publish_provider_fallback`.
+
+### Usage Example
+
+```python
+from app.publishing_engine import publish_clip, PublishRequest
+from app.services.social_accounts import set_account_credentials
+
+# Step 1: Store encrypted credentials for social account
+credentials = {
+    "access_token": "IG_TOKEN_12345",
+    "instagram_account_id": "123456789",
+    "facebook_page_id": "page_123"
+}
+await set_account_credentials(db, social_account.id, credentials)
+
+# Step 2: Publish clip
+request = PublishRequest(
+    clip_id=clip_uuid,
+    platform="instagram",
+    social_account_id=social_account.id,
+    metadata={"caption": "Amazing clip! #viral"}
+)
+
+# Engine will automatically:
+# - Detect credentials exist
+# - Get provider client for account
+# - Check if supports_real_api() returns True
+# - Use provider client (stub mode) instead of simulator
+result = await publish_clip(db, request)
+
+# Check ledger for "publish_provider_ready" event
+```
+
+### Stub Methods
+
+Provider clients currently use stub methods (not real API calls):
+
+**upload_video_stub(file_path, **kwargs)**
+- Simulates video upload
+- Returns fake video_id
+- Maintains same interface as real `upload_video()`
+
+**publish_post_stub(video_id, **kwargs)**
+- Simulates post publishing
+- Returns fake post_id and post_url
+- Maintains same interface as real `publish_post()`
+
+These stub methods will be replaced with real API calls in future phases (PASO 5.4+).
+
+### Ledger Events
+
+When provider client is used, additional events are logged:
+
+- **`publish_provider_ready`**: Provider client has valid credentials and is ready
+- **`publish_provider_fallback`**: Falling back to simulator (with reason)
+
+### Testing
+
+Tests verify the integration logic:
+
+```bash
+# Run provider integration tests
+pytest backend/tests/test_publishing_provider_integration.py -v
+```
+
+**Test Coverage:**
+- ✅ Simulator used when no credentials
+- ✅ Provider client used when credentials present (stub mode)
+- ✅ Fallback to simulator on incomplete credentials
+- ✅ Fallback to simulator on credential errors
+- ✅ Proper ledger event logging
+
+### Configuration
+
+No additional configuration needed - the integration is automatic:
+
+1. If `SocialAccount` has encrypted credentials → Try provider client
+2. If provider client's `supports_real_api()` returns True → Use it (stub mode)
+3. Otherwise → Fall back to simulator
+
+This ensures zero breaking changes while preparing the architecture for real API integration.
 
 ## Complete Publication Flow
 

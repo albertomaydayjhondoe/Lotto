@@ -42,6 +42,24 @@ class TikTokPublishingClient(BasePublishingClient):
     def platform_name(self) -> str:
         return "tiktok"
     
+    def supports_real_api(self) -> bool:
+        """
+        Check if TikTok client has required credentials for real API calls.
+        
+        Required:
+        - client_key: TikTok app client key
+        - client_secret: TikTok app client secret
+        - access_token: OAuth access token
+        
+        Returns:
+            bool: True if all required credentials present
+        """
+        client_key = self.config.get("client_key")
+        client_secret = self.config.get("client_secret")
+        access_token = self.config.get("access_token")
+        
+        return bool(client_key and client_secret and access_token)
+    
     async def authenticate(self) -> bool:
         """
         Authenticate with TikTok Share API.

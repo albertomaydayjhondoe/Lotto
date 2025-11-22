@@ -36,6 +36,20 @@ class BasePublishingClient(ABC):
         """Check if client is currently authenticated."""
         return self._authenticated
     
+    def supports_real_api(self) -> bool:
+        """
+        Check if this client has all required configuration for real API calls.
+        
+        Default implementation checks for basic required fields.
+        Subclasses should override to check platform-specific requirements.
+        
+        Returns:
+            bool: True if client can make real API calls, False to use simulator
+        """
+        # Base implementation: if we have any config, assume we can try real API
+        # Subclasses should implement more specific validation
+        return bool(self.config)
+    
     @abstractmethod
     async def authenticate(self) -> bool:
         """
@@ -115,4 +129,47 @@ class BasePublishingClient(ABC):
             "platform": self.platform_name,
             "authenticated": self.is_authenticated,
             "features": []
+        }
+    
+    async def upload_video_stub(self, file_path: str, **kwargs) -> Dict[str, Any]:
+        """
+        Stub method for video upload - simulates upload without real API call.
+        
+        This method is used when supports_real_api() returns True but we're not
+        ready to make real calls yet. It maintains the same interface as upload_video()
+        but returns simulated results.
+        
+        Args:
+            file_path: Path to video file
+            **kwargs: Platform-specific parameters
+            
+        Returns:
+            Dict with simulated upload result
+        """
+        return {
+            "video_id": f"{self.platform_name}_video_{kwargs.get('clip_id', 'unknown')}",
+            "status": "uploaded_stub",
+            "message": "Video upload simulated (stub mode)"
+        }
+    
+    async def publish_post_stub(self, video_id: str, **kwargs) -> Dict[str, Any]:
+        """
+        Stub method for post publishing - simulates publish without real API call.
+        
+        This method is used when supports_real_api() returns True but we're not
+        ready to make real calls yet. It maintains the same interface as publish_post()
+        but returns simulated results.
+        
+        Args:
+            video_id: Video ID from upload
+            **kwargs: Platform-specific parameters
+            
+        Returns:
+            Dict with simulated publish result
+        """
+        return {
+            "post_id": f"{self.platform_name}_post_{video_id}",
+            "post_url": f"https://{self.platform_name}.com/p/{video_id}",
+            "status": "published_stub",
+            "message": "Post published simulated (stub mode)"
         }

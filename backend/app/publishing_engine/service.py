@@ -9,9 +9,12 @@ from app.models.database import Clip, SocialAccountModel, PublishLogModel
 from app.publishing_engine.models import PublishRequest, PublishResult
 from app.publishing_engine.simulator import get_simulator
 from app.ledger import log_event
-
-# TODO: Replace simulators with real API clients when credentials available
-from app.publishing_integrations import get_provider_client  # noqa: F401
+from app.services.social_accounts import get_account_credentials
+from app.publishing_integrations.account_binding import (
+    get_provider_client_for_account,
+    AccountCredentialsError,
+    UnsupportedPlatformError
+)
 
 
 async def publish_clip(
@@ -48,6 +51,7 @@ async def publish_clip(
         raise ValueError(f"Clip {request.clip_id} not found")
     
     # 2. Validate social account if provided
+    social_account = None
     if request.social_account_id:
         stmt = select(SocialAccountModel).where(
             SocialAccountModel.id == request.social_account_id
@@ -92,12 +96,109 @@ async def publish_clip(
         }
     )
     
-    # 4. Call platform simulator
+    # 4. Determine publishing method: Provider Client (if credentials) or Simulator
+    use_provider_client = False
+    provider_client = None
+    
+    if social_account:
+        # Try to get provider client with credentials
+        try:
+            credentials = await get_account_credentials(db, social_account.id)
+            if credentials:
+                # Credentials exist, try to get provider client
+                try:
+                    provider_client = await get_provider_client_for_account(db, social_account)
+                    
+                    # Check if provider supports real API
+                    if provider_client.supports_real_api():
+                        use_provider_client = True
+                        await log_event(
+                            db=db,
+                            event_type="publish_provider_ready",
+                            entity_type="clip",
+                            entity_id=str(request.clip_id),
+                            metadata={
+                                "platform": request.platform,
+                                "provider": provider_client.platform_name,
+                                "publish_log_id": str(publish_log.id)
+                            }
+                        )
+                    else:
+                        # Provider exists but doesn't have all required config
+                        await log_event(
+                            db=db,
+                            event_type="publish_provider_fallback",
+                            entity_type="clip",
+                            entity_id=str(request.clip_id),
+                            metadata={
+                                "platform": request.platform,
+                                "reason": "incomplete_config",
+                                "publish_log_id": str(publish_log.id)
+                            }
+                        )
+                except (AccountCredentialsError, UnsupportedPlatformError) as e:
+                    # Failed to get provider client, fall back to simulator
+                    await log_event(
+                        db=db,
+                        event_type="publish_provider_fallback",
+                        entity_type="clip",
+                        entity_id=str(request.clip_id),
+                        metadata={
+                            "platform": request.platform,
+                            "reason": str(e),
+                            "publish_log_id": str(publish_log.id)
+                        }
+                    )
+        except Exception as e:
+            # Any error getting credentials, fall back to simulator
+            await log_event(
+                db=db,
+                event_type="publish_provider_fallback",
+                entity_type="clip",
+                entity_id=str(request.clip_id),
+                metadata={
+                    "platform": request.platform,
+                    "reason": f"credential_error: {str(e)}",
+                    "publish_log_id": str(publish_log.id)
+                }
+            )
+    
+    # 5. Execute publish using provider client or simulator
     try:
-        simulator = await get_simulator(request.platform)
-        publish_result = await simulator(request)
+        if use_provider_client and provider_client:
+            # Use provider client (stub mode for now)
+            await provider_client.authenticate()
+            
+            # Upload video (stub)
+            upload_result = await provider_client.upload_video_stub(
+                file_path=clip.video_asset.file_path if clip.video_asset else "/tmp/video.mp4",
+                clip_id=str(request.clip_id),
+                caption=request.extra_metadata.get("caption", "")
+            )
+            
+            # Publish post (stub)
+            publish_result_data = await provider_client.publish_post_stub(
+                video_id=upload_result["video_id"],
+                caption=request.extra_metadata.get("caption", ""),
+                hashtags=request.extra_metadata.get("hashtags", [])
+            )
+            
+            # Convert to PublishResult
+            publish_result = PublishResult(
+                success=True,
+                external_post_id=publish_result_data["post_id"],
+                external_url=publish_result_data["post_url"],
+                error_message=None,
+                platform=request.platform,
+                clip_id=request.clip_id,
+                social_account_id=request.social_account_id
+            )
+        else:
+            # Use simulator (existing flow)
+            simulator = await get_simulator(request.platform)
+            publish_result = await simulator(request)
     except ValueError as e:
-        # Unsupported platform
+        # Unsupported platform or other error
         publish_log.status = "failed"
         publish_log.error_message = str(e)
         await db.commit()
@@ -124,7 +225,7 @@ async def publish_clip(
             social_account_id=request.social_account_id
         )
     
-    # 5. Update log with result
+    # 6. Update log with result
     if publish_result.success:
         publish_log.status = "success"
         publish_log.external_post_id = publish_result.external_post_id

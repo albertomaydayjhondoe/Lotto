@@ -43,6 +43,22 @@ class InstagramPublishingClient(BasePublishingClient):
     def platform_name(self) -> str:
         return "instagram"
     
+    def supports_real_api(self) -> bool:
+        """
+        Check if Instagram client has required credentials for real API calls.
+        
+        Required:
+        - access_token: OAuth access token
+        - instagram_account_id: Instagram Business Account ID
+        
+        Returns:
+            bool: True if all required credentials present
+        """
+        access_token = self.config.get("access_token")
+        instagram_account_id = self.config.get("instagram_account_id")
+        
+        return bool(access_token and instagram_account_id)
+    
     async def authenticate(self) -> bool:
         """
         Authenticate with Instagram Graph API.
