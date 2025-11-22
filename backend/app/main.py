@@ -2,6 +2,7 @@
 FastAPI main application entry point.
 Implements the Orquestador OpenAPI specification.
 """
+import asyncio
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
@@ -19,8 +20,43 @@ from app.orchestrator import orchestrator_router
 from app.dashboard_api import dashboard_router
 from app.dashboard_ai import router as dashboard_ai_router
 from app.dashboard_actions import router as dashboard_actions_router
+from app.live_telemetry.router import router as telemetry_router
+from app.live_telemetry.telemetry_manager import telemetry_manager
+from app.live_telemetry.collector import gather_metrics
 from app.core.config import settings
-from app.core.database import init_db
+from app.core.database import init_db, get_db
+
+
+async def telemetry_broadcast_loop():
+    """
+    Background task that broadcasts telemetry data to all connected clients.
+    
+    Runs every TELEMETRY_INTERVAL_SECONDS and only collects metrics if there
+    are active WebSocket subscribers to optimize database load.
+    """
+    while True:
+        try:
+            # Only collect and broadcast if there are subscribers
+            if telemetry_manager.has_subscribers():
+                # Get database session
+                async for db in get_db():
+                    # Collect metrics
+                    payload = await gather_metrics(db)
+                    
+                    # Broadcast to all connected clients
+                    await telemetry_manager.broadcast(payload)
+                    
+                    break  # Exit the async for loop after one iteration
+            
+            # Wait for next interval
+            await asyncio.sleep(settings.TELEMETRY_INTERVAL_SECONDS)
+            
+        except Exception as e:
+            # Log error but keep loop running
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error in telemetry broadcast loop: {e}")
+            await asyncio.sleep(settings.TELEMETRY_INTERVAL_SECONDS)
 
 
 @asynccontextmanager
@@ -28,9 +64,19 @@ async def lifespan(app: FastAPI):
     """Application lifespan events."""
     # Startup
     await init_db()
+    
+    # Start telemetry broadcast background task
+    telemetry_task = asyncio.create_task(telemetry_broadcast_loop())
+    
     yield
+    
     # Shutdown
-    pass
+    # Cancel telemetry task
+    telemetry_task.cancel()
+    try:
+        await telemetry_task
+    except asyncio.CancelledError:
+        pass
 
 
 app = FastAPI(
@@ -99,6 +145,9 @@ app.include_router(dashboard_ai_router, prefix="/dashboard", tags=["dashboard_ai
 
 # Dashboard Actions endpoints (PASO 6.3)
 app.include_router(dashboard_actions_router, prefix="/dashboard", tags=["dashboard_actions"])
+
+# Live Telemetry WebSocket endpoint (PASO 6.4)
+app.include_router(telemetry_router, prefix="/telemetry", tags=["telemetry"])
 
 # Debug endpoints (DEVELOPMENT ONLY)
 # WARNING: In production, these endpoints should be protected with authentication

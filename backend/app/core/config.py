@@ -58,6 +58,9 @@ class Settings(BaseSettings):
     ORCHESTRATOR_ENABLED: bool = False  # enable autonomous orchestrator loop
     ORCHESTRATOR_INTERVAL_SECONDS: int = 2  # seconds between orchestrator cycles
     
+    # Live Telemetry Configuration (PASO 6.4)
+    TELEMETRY_INTERVAL_SECONDS: int = 3  # seconds between telemetry broadcasts
+    
     # Security / Credentials Encryption (PASO 5.1)
     CREDENTIALS_ENCRYPTION_KEY: str | None = None  # Fernet key for encrypting social account credentials
     

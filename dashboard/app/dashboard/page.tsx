@@ -4,14 +4,26 @@ import React from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Loader } from "@/components/ui/loader"
 import { ChartContainer } from "@/components/ui/chart-container"
+import { Badge } from "@/components/ui/badge"
 import { useDashboardOverview } from "@/hooks/use-dashboard-overview"
+import { useTelemetry } from "@/lib/live/useTelemetry"
+import {
+  LiveQueueCard,
+  LiveSchedulerCard,
+  LiveOrchestratorCard,
+  LivePlatformCard,
+  LiveWorkerCard
+} from "@/components/dashboard/live-metrics-cards"
 import { 
   Video, 
   Scissors, 
   Send, 
   Clock, 
   Activity, 
-  Target 
+  Target,
+  Wifi,
+  WifiOff,
+  Radio
 } from "lucide-react"
 import {
   PieChart,
@@ -31,6 +43,7 @@ import {
 
 export default function DashboardPage() {
   const { data, isLoading, error } = useDashboardOverview()
+  const { data: telemetry, isConnected, lastUpdated } = useTelemetry()
 
   if (isLoading) {
     return (
@@ -50,17 +63,23 @@ export default function DashboardPage() {
 
   if (!data) return null
 
+  // Use live telemetry data if available, fallback to REST API data
+  const queuePending = telemetry?.queue.pending ?? data.pending_publications
+  const queueProcessing = telemetry?.queue.processing ?? 0
+  const queueSuccess = telemetry?.queue.success ?? (data.total_publications - data.failed_publications - data.pending_publications)
+  const queueFailed = telemetry?.queue.failed ?? data.failed_publications
+
   // Prepare chart data
   const publicationStatusData = [
-    { name: "Success", value: data.total_publications - data.failed_publications - data.pending_publications },
-    { name: "Pending", value: data.pending_publications },
-    { name: "Failed", value: data.failed_publications },
+    { name: "Success", value: queueSuccess },
+    { name: "Pending", value: queuePending },
+    { name: "Failed", value: queueFailed },
   ]
 
   const queueData = [
-    { name: "Pending", count: data.pending_publications },
-    { name: "Processing", count: data.active_jobs },
-    { name: "Completed", count: data.total_publications - data.pending_publications },
+    { name: "Pending", count: queuePending },
+    { name: "Processing", count: queueProcessing },
+    { name: "Completed", count: queueSuccess },
   ]
 
   const activityData = [
@@ -122,6 +141,47 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
+      {/* Live Status Badge */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Badge variant={isConnected ? "default" : "secondary"} className="flex items-center gap-1">
+            {isConnected ? (
+              <>
+                <Radio className="h-3 w-3 animate-pulse" />
+                Live
+              </>
+            ) : (
+              <>
+                <WifiOff className="h-3 w-3" />
+                Offline
+              </>
+            )}
+          </Badge>
+          {lastUpdated && isConnected && (
+            <span className="text-xs text-muted-foreground">
+              Updated {Math.floor((Date.now() - lastUpdated.getTime()) / 1000)}s ago
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Live Metrics Grid */}
+      {isConnected && (
+        <div>
+          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <Radio className="h-4 w-4 text-green-500 animate-pulse" />
+            Live Metrics
+          </h2>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+            <LiveQueueCard />
+            <LiveSchedulerCard />
+            <LiveOrchestratorCard />
+            <LivePlatformCard />
+            <LiveWorkerCard />
+          </div>
+        </div>
+      )}
+
       {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {stats.map((stat) => (
