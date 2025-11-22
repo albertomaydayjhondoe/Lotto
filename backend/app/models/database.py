@@ -3,7 +3,7 @@ SQLAlchemy ORM models for database tables.
 """
 from datetime import datetime
 from uuid import uuid4
-from sqlalchemy import Column, String, Integer, Float, DateTime, JSON, ForeignKey, Text, Enum
+from sqlalchemy import Column, String, Integer, Float, DateTime, JSON, ForeignKey, Text, Enum, LargeBinary
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import UniqueConstraint
@@ -233,6 +233,12 @@ class SocialAccountModel(Base):
     is_main_account = Column(Integer, nullable=False, default=0)  # SQLite-compatible boolean (0=False, 1=True)
     is_active = Column(Integer, nullable=False, default=1)  # SQLite-compatible boolean (0=False, 1=True)
     extra_metadata = Column(JSON, nullable=True)  # Additional account metadata
+    
+    # Secure credentials storage (PASO 5.1)
+    encrypted_credentials = Column(LargeBinary, nullable=True)  # Encrypted credentials using Fernet
+    credentials_version = Column(String(50), nullable=True)  # Encryption format version (e.g., "fernet-v1")
+    credentials_updated_at = Column(DateTime, nullable=True)  # Last credentials update timestamp
+    
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     
