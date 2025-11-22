@@ -61,7 +61,8 @@ export default function OrchestratorPage() {
     { name: "Validate", count: 28 },
   ]
 
-  const orchestratorStatus = data?.saturation_rate < 0.7 ? "healthy" : data?.saturation_rate < 0.9 ? "warning" : "critical"
+  const saturationRate = data?.saturation_rate ?? 0
+  const orchestratorStatus = saturationRate < 0.7 ? "healthy" : saturationRate < 0.9 ? "warning" : "critical"
 
   return (
     <div className="space-y-6">
