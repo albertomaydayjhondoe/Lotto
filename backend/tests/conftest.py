@@ -47,3 +47,9 @@ async def db_session(async_engine):
     async with async_session() as session:
         yield session
         await session.rollback()
+
+
+@pytest_asyncio.fixture
+async def async_db_session(db_session):
+    """Alias for db_session for compatibility with different test files."""
+    return db_session

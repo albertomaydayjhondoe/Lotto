@@ -65,6 +65,9 @@ class Settings(BaseSettings):
     AI_WORKER_ENABLED: bool = True  # enable AI global worker
     AI_WORKER_INTERVAL_SECONDS: int = 30  # seconds between AI reasoning cycles
     
+    # AI History Configuration (PASO 8.1)
+    AI_HISTORY_MAX_LIMIT: int = 100  # max items per history query
+    
     # LLM Provider Configuration (PASO 7.2 - PASO 7.3)
     # Operation Mode
     AI_LLM_MODE: str = "stub"  # "stub" or "live" - controls whether to use real API calls

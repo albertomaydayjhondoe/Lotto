@@ -354,3 +354,37 @@ class RefreshTokenModel(Base):
 
     def __repr__(self):
         return f"<RefreshToken(id={self.id}, user_id={self.user_id}, revoked={bool(self.revoked)})>"
+
+
+class AIReasoningHistoryModel(Base):
+    """AI Reasoning History - PASO 8.1
+    
+    Stores historical records of AI Global Worker reasoning runs for analysis and debugging.
+    """
+    __tablename__ = "ai_reasoning_history"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid4()))
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
+    run_id = Column(String(36), unique=True, nullable=False, index=True)  # reasoning_id from AIReasoningOutput
+    triggered_by = Column(String(50), nullable=False)  # "worker", "manual", "debug"
+    
+    # Health metrics
+    health_score = Column(Integer, nullable=False, index=True)  # 0-100
+    status = Column(String(20), nullable=False, index=True)  # "ok", "degraded", "critical"
+    critical_issues_count = Column(Integer, nullable=False, default=0)
+    recommendations_count = Column(Integer, nullable=False, default=0)
+    
+    # Serialized data (JSON)
+    snapshot_json = Column(JSON, nullable=True)
+    summary_json = Column(JSON, nullable=True)
+    recommendations_json = Column(JSON, nullable=True)
+    action_plan_json = Column(JSON, nullable=True)
+    
+    # Performance
+    duration_ms = Column(Integer, nullable=True)
+    
+    # Metadata
+    meta = Column(JSON, nullable=True)
+
+    def __repr__(self):
+        return f"<AIReasoningHistory(id={self.id}, score={self.health_score}, status={self.status})>"
