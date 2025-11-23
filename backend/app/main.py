@@ -29,6 +29,7 @@ from app.alerting_engine.websocket import alert_manager
 from app.alerting_engine.engine import analyze_system_state
 from app.auth import auth_router
 from app.ai_global_worker import ai_global_router, start_ai_worker_loop, stop_ai_worker_loop
+from app.visual_analytics import router as visual_analytics_router
 from app.core.config import settings
 from app.core.database import init_db, get_db
 
@@ -222,6 +223,9 @@ app.include_router(auth_router, tags=["auth"])
 
 # AI Global Worker endpoints (PASO 7.0)
 app.include_router(ai_global_router, tags=["ai_global_worker"])
+
+# Visual Analytics endpoints (PASO 8.3)
+app.include_router(visual_analytics_router, tags=["visual_analytics"])
 
 # Debug endpoints (DEVELOPMENT ONLY)
 # WARNING: In production, these endpoints should be protected with authentication
