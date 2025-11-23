@@ -246,5 +246,28 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint."""
-    return {"status": "healthy"}
+    """
+    Health check endpoint for production monitoring.
+    Verifies backend is running and database is accessible.
+    """
+    from sqlalchemy import text
+    
+    health_status = {
+        "status": "healthy",
+        "service": settings.PROJECT_NAME,
+        "version": settings.VERSION,
+    }
+    
+    # Check database connectivity
+    try:
+        async for db in get_db():
+            # Simple query to verify DB connection
+            await db.execute(text("SELECT 1"))
+            health_status["database"] = "connected"
+            break
+    except Exception as e:
+        health_status["status"] = "unhealthy"
+        health_status["database"] = "disconnected"
+        health_status["error"] = str(e)
+    
+    return health_status
