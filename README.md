@@ -337,21 +337,109 @@ const campaign = await DefaultService.postCampaigns({
 
 ## 🚢 Deployment
 
-### Railway / Render
+### Railway (Recomendado)
+
+Deploy completo con un solo comando:
+
+```bash
+# 1. Instalar Railway CLI
+npm install -g @railway/cli
+
+# 2. Login
+railway login
+
+# 3. Deploy automatizado (incluye PostgreSQL, Backend, Dashboard, Nginx)
+./deploy-railway.sh
+```
+
+**Características:**
+- ✅ 4 servicios integrados (Backend, Dashboard, Nginx, PostgreSQL)
+- ✅ Generación automática de secretos
+- ✅ Migraciones de BD automáticas
+- ✅ Dominios HTTPS gratuitos
+- ✅ Health checks integrados
+- ✅ Costo estimado: **$15-30/mes** (Hobby plan)
+
+**Documentación completa:** Ver [DEPLOY_RAILWAY.md](./DEPLOY_RAILWAY.md)
+
+#### Deploy Manual (Railway)
+
+```bash
+# 1. Crear proyecto
+railway init --name stakazo-prod
+
+# 2. Agregar PostgreSQL
+railway add --service postgres
+
+# 3. Deploy backend
+cd backend
+railway up --service backend
+
+# 4. Ejecutar migraciones
+railway run alembic upgrade head
+
+# 5. Deploy dashboard
+cd ../dashboard
+railway up --service dashboard
+```
+
+#### Health Check Post-Deploy
+
+```bash
+# Verificar todos los servicios
+./scripts/healthcheck-railway.sh
+
+# O manualmente:
+railway status
+railway logs --tail
+```
+
+### Otras Plataformas (Render, Heroku, etc.)
 
 1. Conectar repositorio
-2. Configurar variables de entorno
+2. Configurar variables de entorno (ver sección abajo)
 3. Agregar PostgreSQL addon
 4. Deploy automático en cada push a `main`
 
 ### Environment Variables para Producción
 
 ```bash
+# Database
 DATABASE_URL=postgresql+asyncpg://user:pass@host:5432/db
-SECRET_KEY=<generate-secure-key>
+
+# Security (generar con deploy-railway.sh o manualmente)
+SECRET_KEY=<generate-with-secrets.token_urlsafe(32)>
+CREDENTIALS_ENCRYPTION_KEY=<generate-with-Fernet.generate_key()>
+NEXTAUTH_SECRET=<generate-with-openssl-rand-base64-32>
+
+# Application
+PYTHONUNBUFFERED=1
+DEBUG_ENDPOINTS_ENABLED=false
+WORKER_ENABLED=true
+
+# Storage
 UPLOAD_DIR=/app/uploads
 MAX_UPLOAD_SIZE=524288000
+
+# CORS (ajustar a dominios reales)
 BACKEND_CORS_ORIGINS=["https://yourdomain.com"]
+
+# Dashboard
+NEXT_PUBLIC_API_BASE_URL=https://your-backend.railway.app
+NEXTAUTH_URL=https://your-dashboard.railway.app
+```
+
+#### Generación Segura de Secretos
+
+```bash
+# SECRET_KEY
+python3 -c "import secrets; print(secrets.token_urlsafe(32))"
+
+# CREDENTIALS_ENCRYPTION_KEY
+python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+
+# NEXTAUTH_SECRET
+openssl rand -base64 32
 ```
 
 ## 📝 Licencia
