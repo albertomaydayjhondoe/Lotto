@@ -15,13 +15,15 @@ import {
   Sparkles,
   Lightbulb,
   Zap,
-  Bell
+  Bell,
+  History
 } from "lucide-react"
 import { useAuth } from "@/hooks/use-auth"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useAlertStats } from "@/lib/alerts/hooks"
+import { useAIHistoryCount } from "@/lib/ai_history/hooks"
 
 const navigation = [
   { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
@@ -36,6 +38,7 @@ const aiNavigation = [
   { name: "AI Overview", href: "/dashboard/ai", icon: Sparkles },
   { name: "Recommendations", href: "/dashboard/ai/recommendations", icon: Lightbulb },
   { name: "Actions", href: "/dashboard/ai/actions", icon: Zap },
+  { name: "AI History", href: "/dashboard/ai/history", icon: History, showCount: true },
 ]
 
 export default function DashboardLayout({
@@ -47,6 +50,7 @@ export default function DashboardLayout({
   const { logout } = useAuth()
   const [sidebarOpen, setSidebarOpen] = React.useState(false)
   const { data: alertStats } = useAlertStats()
+  const { data: historyCount } = useAIHistoryCount()
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -126,20 +130,32 @@ export default function DashboardLayout({
               <div className="space-y-1">
                 {aiNavigation.map((item) => {
                   const isActive = pathname === item.href
+                  const showHistoryCount = item.showCount && historyCount && historyCount > 0
+                  
                   return (
                     <Link
                       key={item.name}
                       href={item.href}
                       className={cn(
-                        "flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors",
+                        "flex items-center justify-between px-4 py-3 rounded-lg transition-colors",
                         isActive
                           ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white"
                           : "text-gray-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50"
                       )}
                       onClick={() => setSidebarOpen(false)}
                     >
-                      <item.icon className="h-5 w-5" />
-                      <span className="font-medium">{item.name}</span>
+                      <div className="flex items-center space-x-3">
+                        <item.icon className="h-5 w-5" />
+                        <span className="font-medium">{item.name}</span>
+                      </div>
+                      {showHistoryCount && (
+                        <Badge 
+                          variant={isActive ? "secondary" : "outline"}
+                          className="h-5 min-w-[20px] flex items-center justify-center text-xs px-1.5"
+                        >
+                          {historyCount}
+                        </Badge>
+                      )}
                     </Link>
                   )
                 })}
