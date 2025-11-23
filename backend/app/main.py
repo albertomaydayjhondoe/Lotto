@@ -20,6 +20,7 @@ from app.orchestrator import orchestrator_router
 from app.dashboard_api import dashboard_router
 from app.dashboard_ai import router as dashboard_ai_router
 from app.dashboard_actions import router as dashboard_actions_router
+from app.dashboard_ai_integration import dashboard_ai_integration_router
 from app.live_telemetry.router import router as telemetry_router
 from app.live_telemetry.telemetry_manager import telemetry_manager
 from app.live_telemetry.collector import gather_metrics
@@ -134,9 +135,10 @@ async def lifespan(app: FastAPI):
     # Stop AI Worker
     if ai_worker_task:
         await stop_ai_worker_loop()
-        await alert_task
-    except asyncio.CancelledError:
-        pass
+        try:
+            await ai_worker_task
+        except asyncio.CancelledError:
+            pass
 
 
 app = FastAPI(
@@ -205,6 +207,9 @@ app.include_router(dashboard_ai_router, prefix="/dashboard", tags=["dashboard_ai
 
 # Dashboard Actions endpoints (PASO 6.3)
 app.include_router(dashboard_actions_router, prefix="/dashboard", tags=["dashboard_actions"])
+
+# Dashboard AI Integration endpoints (PASO 8.0)
+app.include_router(dashboard_ai_integration_router, prefix="/dashboard", tags=["dashboard_ai_integration"])
 
 # Live Telemetry WebSocket endpoint (PASO 6.4)
 app.include_router(telemetry_router, prefix="/telemetry", tags=["telemetry"])
