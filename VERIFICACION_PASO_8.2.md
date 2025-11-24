@@ -13,7 +13,7 @@
 - ✅ **`getAIHistory(filters)`** - Implementado
   - ✅ Construye query string con todos los filtros
   - ✅ Llama a `/ai/global/history`
-  - ✅ Retorna `Promise<AIHistoryItem[]>`
+  - ✅ Retorna `Promise<AIHistoryItem[]>`                                                    
   
 - ✅ **`getAIHistoryItem(id)`** - Implementado
   - ✅ Llama a `/ai/global/history/{id}`
