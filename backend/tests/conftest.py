@@ -7,6 +7,15 @@ import pytest_asyncio
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.pool import NullPool
 
+# Monkey-patch SQLite to support UUID type (PostgreSQL UUID renders as CHAR(36) in SQLite)
+import sqlalchemy.dialects.sqlite.base as sqlite_base
+
+def visit_UUID(self, type_, **kw):
+    """Make UUID compatible with SQLite by rendering as CHAR(36)"""
+    return "CHAR(36)"
+
+sqlite_base.SQLiteTypeCompiler.visit_UUID = visit_UUID
+
 from app.models.database import Base
 
 # Test database URL

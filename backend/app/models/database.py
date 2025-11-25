@@ -388,3 +388,351 @@ class AIReasoningHistoryModel(Base):
 
     def __repr__(self):
         return f"<AIReasoningHistory(id={self.id}, score={self.health_score}, status={self.status})>"
+
+
+# ============================================================================
+# META ADS MODELS - PASO 10.1
+# ============================================================================
+
+
+class MetaAccountModel(Base):
+    """Meta (Facebook) Ads Account - PASO 10.1
+    
+    Stores Meta Business Manager accounts linked to social accounts.
+    One-to-one relationship with SocialAccountModel (platform='facebook' or 'instagram').
+    """
+    __tablename__ = "meta_accounts"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    social_account_id = Column(UUID(as_uuid=True), ForeignKey("social_accounts.id"), nullable=False, unique=True)
+    
+    # Meta account details
+    ad_account_id = Column(String(255), nullable=False, unique=True, index=True)  # e.g., "act_123456789"
+    business_id = Column(String(255), nullable=True, index=True)  # Meta Business Manager ID
+    account_name = Column(String(255), nullable=True)
+    currency = Column(String(10), nullable=True, default="USD")  # USD, EUR, etc.
+    timezone = Column(String(50), nullable=True, default="UTC")
+    
+    # Account status
+    is_active = Column(Integer, nullable=False, default=1)  # SQLite-compatible boolean
+    account_status = Column(String(50), nullable=True)  # ACTIVE, DISABLED, etc.
+    
+    # Spending limits
+    spend_cap = Column(Float, nullable=True)  # Max spend in account currency
+    amount_spent = Column(Float, nullable=True, default=0.0)  # Total spent
+    
+    # Metadata
+    extra_metadata = Column(JSON, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    
+    # Relationships
+    social_account = relationship("SocialAccountModel", backref="meta_account")
+    pixels = relationship("MetaPixelModel", back_populates="meta_account", cascade="all, delete-orphan")
+    campaigns = relationship("MetaCampaignModel", back_populates="meta_account", cascade="all, delete-orphan")
+    
+    def __repr__(self):
+        return f"<MetaAccount(id={self.id}, ad_account_id={self.ad_account_id})>"
+
+
+class MetaPixelModel(Base):
+    """Meta Pixel - PASO 10.1
+    
+    Tracks Meta Pixel IDs for conversion tracking and audience building.
+    """
+    __tablename__ = "meta_pixels"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    meta_account_id = Column(UUID(as_uuid=True), ForeignKey("meta_accounts.id"), nullable=False, index=True)
+    
+    # Pixel details
+    pixel_id = Column(String(255), nullable=False, unique=True, index=True)
+    pixel_name = Column(String(255), nullable=True)
+    is_active = Column(Integer, nullable=False, default=1)  # SQLite-compatible boolean
+    
+    # Metadata
+    extra_metadata = Column(JSON, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    
+    # Relationships
+    meta_account = relationship("MetaAccountModel", back_populates="pixels")
+    
+    def __repr__(self):
+        return f"<MetaPixel(id={self.id}, pixel_id={self.pixel_id})>"
+
+
+class MetaCreativeModel(Base):
+    """Meta Creative - PASO 10.1
+    
+    Stores creative assets (videos, images) uploaded to Meta.
+    Linked to VideoAsset for source video tracking.
+    """
+    __tablename__ = "meta_creatives"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    video_asset_id = Column(UUID(as_uuid=True), ForeignKey("video_assets.id"), nullable=True, index=True)
+    
+    # Meta creative details
+    creative_id = Column(String(255), nullable=False, unique=True, index=True)  # Meta's creative ID
+    creative_name = Column(String(255), nullable=True)
+    creative_type = Column(String(50), nullable=False)  # "video", "image", "carousel"
+    
+    # Video-specific fields
+    video_url = Column(Text, nullable=True)  # Meta's hosted video URL
+    thumbnail_url = Column(Text, nullable=True)
+    duration_ms = Column(Integer, nullable=True)
+    
+    # Status
+    status = Column(String(50), nullable=False, default="active")  # active, archived, deleted
+    
+    # Human control flags
+    is_approved = Column(Integer, nullable=False, default=0)  # Requires human approval
+    is_reviewed = Column(Integer, nullable=False, default=0)  # Has been reviewed
+    reviewed_by = Column(String(255), nullable=True)  # User who reviewed
+    reviewed_at = Column(DateTime, nullable=True)
+    
+    # Content restrictions
+    genre = Column(String(100), nullable=True)  # Content genre
+    subgenre = Column(String(100), nullable=True)  # Content subgenre
+    age_restriction = Column(String(20), nullable=True)  # "18+", "13+", "all"
+    
+    # Metadata
+    extra_metadata = Column(JSON, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    
+    # Relationships
+    video_asset = relationship("VideoAsset", backref="meta_creatives")
+    ads = relationship("MetaAdModel", back_populates="creative")
+    
+    def __repr__(self):
+        return f"<MetaCreative(id={self.id}, creative_id={self.creative_id}, type={self.creative_type})>"
+
+
+class MetaCampaignModel(Base):
+    """Meta Campaign - PASO 10.1
+    
+    Top-level campaign structure in Meta Ads hierarchy.
+    Campaign → Adset → Ad → Insights
+    """
+    __tablename__ = "meta_campaigns"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    meta_account_id = Column(UUID(as_uuid=True), ForeignKey("meta_accounts.id"), nullable=False, index=True)
+    
+    # Meta campaign details
+    campaign_id = Column(String(255), nullable=False, unique=True, index=True)  # Meta's campaign ID
+    campaign_name = Column(String(255), nullable=False)
+    objective = Column(String(100), nullable=False)  # REACH, VIDEO_VIEWS, CONVERSIONS, etc.
+    status = Column(String(50), nullable=False, default="PAUSED", index=True)  # ACTIVE, PAUSED, DELETED
+    
+    # Budget
+    daily_budget = Column(Float, nullable=True)  # Daily budget in account currency
+    lifetime_budget = Column(Float, nullable=True)  # Total lifetime budget
+    budget_remaining = Column(Float, nullable=True)
+    
+    # Schedule
+    start_time = Column(DateTime, nullable=True)
+    stop_time = Column(DateTime, nullable=True)
+    
+    # Human control flags
+    requires_approval = Column(Integer, nullable=False, default=1)  # Must be approved before activation
+    is_approved = Column(Integer, nullable=False, default=0)
+    approved_by = Column(String(255), nullable=True)
+    approved_at = Column(DateTime, nullable=True)
+    
+    # Tracking
+    utm_source = Column(String(100), nullable=True)
+    utm_medium = Column(String(100), nullable=True)
+    utm_campaign = Column(String(255), nullable=True)
+    utm_content = Column(String(255), nullable=True)
+    
+    # Metadata
+    extra_metadata = Column(JSON, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    
+    # Relationships
+    meta_account = relationship("MetaAccountModel", back_populates="campaigns")
+    adsets = relationship("MetaAdsetModel", back_populates="campaign", cascade="all, delete-orphan")
+    
+    def __repr__(self):
+        return f"<MetaCampaign(id={self.id}, name={self.campaign_name}, status={self.status})>"
+
+
+class MetaAdsetModel(Base):
+    """Meta Adset - PASO 10.1
+    
+    Mid-level adset structure in Meta Ads hierarchy.
+    Contains targeting, budget, and schedule details.
+    """
+    __tablename__ = "meta_adsets"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    campaign_id = Column(UUID(as_uuid=True), ForeignKey("meta_campaigns.id"), nullable=False, index=True)
+    
+    # Meta adset details
+    adset_id = Column(String(255), nullable=False, unique=True, index=True)  # Meta's adset ID
+    adset_name = Column(String(255), nullable=False)
+    status = Column(String(50), nullable=False, default="PAUSED", index=True)  # ACTIVE, PAUSED, DELETED
+    
+    # Budget (at adset level)
+    daily_budget = Column(Float, nullable=True)
+    lifetime_budget = Column(Float, nullable=True)
+    bid_amount = Column(Float, nullable=True)
+    bid_strategy = Column(String(50), nullable=True)  # LOWEST_COST_WITHOUT_CAP, COST_CAP, etc.
+    
+    # Targeting
+    targeting = Column(JSON, nullable=True)  # Age, gender, location, interests, etc.
+    age_min = Column(Integer, nullable=True)
+    age_max = Column(Integer, nullable=True)
+    gender = Column(String(20), nullable=True)  # "male", "female", "all"
+    locations = Column(JSON, nullable=True)  # Countries, cities, regions
+    interests = Column(JSON, nullable=True)  # Interest targeting
+    
+    # Placement
+    placements = Column(JSON, nullable=True)  # Facebook, Instagram, Audience Network, etc.
+    
+    # Schedule
+    start_time = Column(DateTime, nullable=True)
+    end_time = Column(DateTime, nullable=True)
+    
+    # Optimization
+    optimization_goal = Column(String(100), nullable=True)  # IMPRESSIONS, REACH, VIDEO_VIEWS, etc.
+    billing_event = Column(String(50), nullable=True)  # IMPRESSIONS, VIDEO_VIEWS, etc.
+    
+    # Metadata
+    extra_metadata = Column(JSON, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    
+    # Relationships
+    campaign = relationship("MetaCampaignModel", back_populates="adsets")
+    ads = relationship("MetaAdModel", back_populates="adset", cascade="all, delete-orphan")
+    
+    def __repr__(self):
+        return f"<MetaAdset(id={self.id}, name={self.adset_name}, status={self.status})>"
+
+
+class MetaAdModel(Base):
+    """Meta Ad - PASO 10.1
+    
+    Individual ad in Meta Ads hierarchy.
+    Links creative to campaign/adset structure.
+    """
+    __tablename__ = "meta_ads"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    adset_id = Column(UUID(as_uuid=True), ForeignKey("meta_adsets.id"), nullable=False, index=True)
+    creative_id = Column(UUID(as_uuid=True), ForeignKey("meta_creatives.id"), nullable=True, index=True)
+    
+    # Meta ad details
+    ad_id = Column(String(255), nullable=False, unique=True, index=True)  # Meta's ad ID
+    ad_name = Column(String(255), nullable=False)
+    status = Column(String(50), nullable=False, default="PAUSED", index=True)  # ACTIVE, PAUSED, DELETED
+    
+    # Ad copy
+    headline = Column(String(500), nullable=True)
+    primary_text = Column(Text, nullable=True)
+    description = Column(Text, nullable=True)
+    call_to_action = Column(String(50), nullable=True)  # LEARN_MORE, SHOP_NOW, etc.
+    
+    # Landing page
+    link_url = Column(Text, nullable=True)
+    display_link = Column(String(255), nullable=True)
+    
+    # Pixel tracking
+    pixel_id = Column(String(255), nullable=True, index=True)  # Pixel ID for conversion tracking
+    
+    # Human review
+    is_reviewed = Column(Integer, nullable=False, default=0)
+    reviewed_by = Column(String(255), nullable=True)
+    reviewed_at = Column(DateTime, nullable=True)
+    review_notes = Column(Text, nullable=True)
+    
+    # Metadata
+    extra_metadata = Column(JSON, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    
+    # Relationships
+    adset = relationship("MetaAdsetModel", back_populates="ads")
+    creative = relationship("MetaCreativeModel", back_populates="ads")
+    insights = relationship("MetaAdInsightsModel", back_populates="ad", cascade="all, delete-orphan")
+    
+    def __repr__(self):
+        return f"<MetaAd(id={self.id}, name={self.ad_name}, status={self.status})>"
+
+
+class MetaAdInsightsModel(Base):
+    """Meta Ad Insights - PASO 10.1
+    
+    Stores daily performance metrics for Meta ads.
+    Time-series data for analysis and optimization.
+    """
+    __tablename__ = "meta_ad_insights"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    ad_id = Column(UUID(as_uuid=True), ForeignKey("meta_ads.id"), nullable=False, index=True)
+    
+    # Time period
+    date = Column(DateTime, nullable=False, index=True)  # Date of metrics (UTC)
+    date_start = Column(DateTime, nullable=True)
+    date_stop = Column(DateTime, nullable=True)
+    
+    # Delivery metrics
+    impressions = Column(Integer, nullable=True, default=0)
+    reach = Column(Integer, nullable=True, default=0)
+    frequency = Column(Float, nullable=True, default=0.0)
+    
+    # Engagement metrics
+    clicks = Column(Integer, nullable=True, default=0)
+    inline_link_clicks = Column(Integer, nullable=True, default=0)
+    unique_clicks = Column(Integer, nullable=True, default=0)
+    ctr = Column(Float, nullable=True, default=0.0)  # Click-through rate
+    
+    # Video metrics
+    video_views = Column(Integer, nullable=True, default=0)
+    video_views_3s = Column(Integer, nullable=True, default=0)
+    video_views_10s = Column(Integer, nullable=True, default=0)
+    video_views_25_percent = Column(Integer, nullable=True, default=0)
+    video_views_50_percent = Column(Integer, nullable=True, default=0)
+    video_views_75_percent = Column(Integer, nullable=True, default=0)
+    video_views_100_percent = Column(Integer, nullable=True, default=0)
+    video_avg_watch_time = Column(Float, nullable=True, default=0.0)  # Seconds
+    
+    # Cost metrics
+    spend = Column(Float, nullable=True, default=0.0)
+    cpc = Column(Float, nullable=True, default=0.0)  # Cost per click
+    cpm = Column(Float, nullable=True, default=0.0)  # Cost per thousand impressions
+    cpp = Column(Float, nullable=True, default=0.0)  # Cost per purchase
+    
+    # Conversion metrics
+    actions = Column(JSON, nullable=True)  # List of actions (likes, comments, shares, conversions)
+    conversions = Column(Integer, nullable=True, default=0)
+    conversion_rate = Column(Float, nullable=True, default=0.0)
+    cost_per_conversion = Column(Float, nullable=True, default=0.0)
+    
+    # ROAS (Return on Ad Spend)
+    purchase_value = Column(Float, nullable=True, default=0.0)
+    roas = Column(Float, nullable=True, default=0.0)
+    
+    # Attribution
+    attribution_setting = Column(String(50), nullable=True)  # "1d_view", "7d_click", etc.
+    
+    # Metadata
+    extra_metadata = Column(JSON, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    
+    # Relationships
+    ad = relationship("MetaAdModel", back_populates="insights")
+    
+    # Composite unique constraint (one insight per ad per day)
+    __table_args__ = (
+        UniqueConstraint('ad_id', 'date', name='uq_meta_insights_ad_date'),
+    )
+    
+    def __repr__(self):
+        return f"<MetaAdInsights(ad_id={self.ad_id}, date={self.date}, impressions={self.impressions})>"
