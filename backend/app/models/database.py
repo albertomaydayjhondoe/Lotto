@@ -556,6 +556,7 @@ class MetaCampaignModel(Base):
     # Relationships
     meta_account = relationship("MetaAccountModel", back_populates="campaigns")
     adsets = relationship("MetaAdsetModel", back_populates="campaign", cascade="all, delete-orphan")
+    ab_tests = relationship("MetaAbTestModel", back_populates="campaign", cascade="all, delete-orphan")
     
     def __repr__(self):
         return f"<MetaCampaign(id={self.id}, name={self.campaign_name}, status={self.status})>"
@@ -736,3 +737,55 @@ class MetaAdInsightsModel(Base):
     
     def __repr__(self):
         return f"<MetaAdInsights(ad_id={self.ad_id}, date={self.date}, impressions={self.impressions})>"
+
+
+# Meta A/B Testing Model (PASO 10.4)
+class MetaAbTestModel(Base):
+    """A/B testing model for Meta Ads campaigns."""
+    __tablename__ = "meta_ab_tests"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    campaign_id = Column(UUID(as_uuid=True), ForeignKey("meta_campaigns.id", ondelete="CASCADE"), nullable=False)
+    test_name = Column(String(255), nullable=False)
+    
+    # Test variants (list of clip IDs)
+    variants = Column(JSON, nullable=False)  # [{"clip_id": "uuid", "ad_id": "uuid", "creative_id": "uuid"}]
+    
+    # Metrics to evaluate
+    metrics = Column(JSON, nullable=False, default=["ctr", "cpc", "engagement"])  # List of metric names
+    
+    # Test status
+    status = Column(String(50), nullable=False, default="active")  # active, evaluating, completed, archived, needs_more_data
+    
+    # Winner information
+    winner_clip_id = Column(UUID(as_uuid=True), nullable=True)
+    winner_ad_id = Column(UUID(as_uuid=True), nullable=True)
+    winner_decided_at = Column(DateTime, nullable=True)
+    
+    # Metrics snapshot at evaluation time
+    metrics_snapshot = Column(JSON, nullable=True)  # Snapshot of all metrics when winner was decided
+    
+    # Statistical evaluation results
+    statistical_results = Column(JSON, nullable=True)  # Chi-square, p-values, confidence intervals
+    
+    # Test timing
+    start_time = Column(DateTime, nullable=False, default=datetime.utcnow)
+    end_time = Column(DateTime, nullable=True)
+    min_impressions = Column(Integer, nullable=False, default=1000)  # Minimum impressions before evaluation
+    min_duration_hours = Column(Integer, nullable=False, default=48)  # Minimum test duration in hours
+    
+    # Publishing information
+    published_to_social = Column(Integer, nullable=False, default=0)  # 0=not published, 1=published
+    publish_log_id = Column(UUID(as_uuid=True), ForeignKey("publish_logs.id"), nullable=True)
+    
+    # Metadata
+    extra_metadata = Column(JSON, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    
+    # Relationships
+    campaign = relationship("MetaCampaignModel", back_populates="ab_tests")
+    publish_log = relationship("PublishLogModel", foreign_keys=[publish_log_id])
+    
+    def __repr__(self):
+        return f"<MetaAbTest(id={self.id}, test_name={self.test_name}, status={self.status})>"

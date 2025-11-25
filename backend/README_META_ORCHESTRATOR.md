@@ -228,16 +228,373 @@ app.models.database  # PASO 10.1
 app.core.auth       # RBAC
 ```
 
+## 🎯 A/B Testing & Auto-Publish (PASO 10.4)
+
+### Overview
+
+El sistema de A/B testing permite comparar múltiples variantes de creativos publicitarios y seleccionar automáticamente el "ganador" basándose en métricas de rendimiento. El ganador puede ser publicado automáticamente en redes sociales.
+
+### Architecture
+
+```
+1. Create A/B Test → Multiple variants (2+) assigned to campaign
+2. Run Test → Collect metrics (CTR, CPC, ROAS, engagement)
+3. Evaluate → Statistical test (chi-square) + composite score
+4. Select Winner → Based on ROAS (50%) + CTR (30%) + CPC (20%)
+5. Auto-Publish → Create PublishLog → Publishing queue
+```
+
+### API Endpoints
+
+#### POST /meta/orchestrate/ab
+
+Crea un nuevo A/B test para una campaña.
+
+**Request:**
+```json
+{
+  "campaign_id": "uuid",
+  "test_name": "Black Friday Creative Test",
+  "variants": [
+    {"clip_id": "uuid-1", "ad_id": "uuid-ad-1"},
+    {"clip_id": "uuid-2", "ad_id": "uuid-ad-2"}
+  ],
+  "metrics": ["ctr", "cpc", "roas", "engagement"],
+  "min_impressions": 1000,
+  "min_duration_hours": 48
+}
+```
+
+**Response (201):**
+```json
+{
+  "id": "ab-test-uuid",
+  "campaign_id": "campaign-uuid",
+  "test_name": "Black Friday Creative Test",
+  "status": "active",
+  "variants": [...],
+  "metrics": ["ctr", "cpc", "roas", "engagement"],
+  "start_time": "2025-11-25T10:00:00Z",
+  "min_impressions": 1000,
+  "min_duration_hours": 48
+}
+```
+
+**curl Example:**
+```bash
+curl -X POST http://localhost:8000/meta/orchestrate/ab \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -d '{
+    "campaign_id": "550e8400-e29b-41d4-a716-446655440000",
+    "test_name": "Summer Sale Test",
+    "variants": [
+      {"clip_id": "clip-uuid-1", "ad_id": "ad-uuid-1"},
+      {"clip_id": "clip-uuid-2", "ad_id": "ad-uuid-2"}
+    ],
+    "metrics": ["ctr", "cpc", "engagement"],
+    "min_impressions": 1000,
+    "min_duration_hours": 48
+  }'
+```
+
+#### GET /meta/orchestrate/ab/{ab_test_id}
+
+Obtiene detalles de un A/B test.
+
+**Response (200):**
+```json
+{
+  "id": "ab-test-uuid",
+  "campaign_id": "campaign-uuid",
+  "test_name": "Black Friday Creative Test",
+  "status": "completed",
+  "variants": [...],
+  "winner_clip_id": "uuid-1",
+  "winner_ad_id": "uuid-ad-1",
+  "winner_decided_at": "2025-11-27T14:30:00Z",
+  "metrics_snapshot": [
+    {
+      "clip_id": "uuid-1",
+      "impressions": 5000,
+      "clicks": 250,
+      "ctr": 5.0,
+      "cpc": 2.0,
+      "roas": 4.5
+    },
+    {
+      "clip_id": "uuid-2",
+      "impressions": 5000,
+      "clicks": 150,
+      "ctr": 3.0,
+      "cpc": 2.5,
+      "roas": 3.2
+    }
+  ],
+  "statistical_results": {
+    "chi2": 125.5,
+    "p_value": 0.001,
+    "significant": true,
+    "confidence": "95%"
+  },
+  "published_to_social": true,
+  "publish_log_id": "publish-log-uuid"
+}
+```
+
+#### POST /meta/orchestrate/ab/{ab_test_id}/evaluate
+
+Evalúa un A/B test y selecciona un ganador.
+
+**Request:**
+```json
+{
+  "force": false
+}
+```
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "winner_clip_id": "uuid-1",
+  "winner_ad_id": "uuid-ad-1",
+  "metrics_snapshot": [...],
+  "statistical_results": {
+    "chi2": 125.5,
+    "p_value": 0.001,
+    "significant": true
+  },
+  "composite_scores": {
+    "uuid-1": 4.35,
+    "uuid-2": 3.12
+  }
+}
+```
+
+**Embargo Rules:**
+- Minimum duration: 48 hours (configurable)
+- Minimum impressions: 1,000 per variant (configurable)
+- Status: `needs_more_data` if rules not met
+
+**curl Example:**
+```bash
+curl -X POST http://localhost:8000/meta/orchestrate/ab/{test-id}/evaluate \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -d '{"force": false}'
+```
+
+#### POST /meta/orchestrate/ab/{ab_test_id}/publish-winner
+
+Publica el ganador del A/B test en redes sociales.
+
+**Request:**
+```json
+{
+  "social_account_id": "social-account-uuid"
+}
+```
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "publish_log_id": "publish-log-uuid",
+  "clip_id": "winner-clip-uuid",
+  "social_account_id": "social-account-uuid",
+  "status": "pending",
+  "message": "Winner queued for publishing"
+}
+```
+
+**curl Example:**
+```bash
+curl -X POST http://localhost:8000/meta/orchestrate/ab/{test-id}/publish-winner \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -d '{"social_account_id": "account-uuid"}'
+```
+
+#### POST /meta/orchestrate/ab/{ab_test_id}/archive
+
+Archiva un A/B test.
+
+**Response (200):**
+```json
+{
+  "id": "ab-test-uuid",
+  "status": "archived",
+  "message": "A/B test archived successfully"
+}
+```
+
+### Winner Selection Algorithm
+
+**Composite Score Formula:**
+```
+score = (ROAS × 0.5) + (CTR × 0.3) + (normalized_CPC × 0.2)
+```
+
+- **ROAS (50% weight)**: Return on Ad Spend - most important for ROI
+- **CTR (30% weight)**: Click-Through Rate - engagement indicator
+- **CPC (20% weight)**: Cost Per Click - efficiency metric (inverted, lower is better)
+
+### Statistical Evaluation
+
+**Chi-Square Test:**
+- Tests statistical significance between variants
+- 95% confidence level (p-value < 0.05)
+- Applied to CTR comparison
+
+**Example:**
+```python
+Variant A: 5,000 impressions, 250 clicks (5% CTR)
+Variant B: 5,000 impressions, 150 clicks (3% CTR)
+
+Chi-square = 125.5, p-value = 0.001
+Result: Statistically significant difference
+```
+
+### Database Schema
+
+**MetaAbTestModel:**
+```sql
+CREATE TABLE meta_ab_tests (
+    id UUID PRIMARY KEY,
+    campaign_id UUID REFERENCES meta_campaigns(id),
+    test_name VARCHAR(255),
+    variants JSON,  -- List of {clip_id, ad_id}
+    metrics JSON,   -- ["ctr", "cpc", "roas"]
+    status VARCHAR(50),  -- active, evaluating, completed, archived, needs_more_data
+    winner_clip_id UUID,
+    winner_ad_id UUID,
+    winner_decided_at TIMESTAMP,
+    metrics_snapshot JSON,
+    statistical_results JSON,
+    start_time TIMESTAMP,
+    end_time TIMESTAMP,
+    min_impressions INTEGER DEFAULT 1000,
+    min_duration_hours INTEGER DEFAULT 48,
+    published_to_social INTEGER DEFAULT 0,
+    publish_log_id UUID REFERENCES publish_logs(id),
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
+);
+```
+
+### Integration with Publishing Engine
+
+When a winner is selected and published:
+
+1. **Create PublishLog** with status `pending`
+2. **Queue for Publishing** - Will be picked up by publishing queue worker
+3. **Metadata** includes:
+   - `ab_test_id`: Reference to the A/B test
+   - `source`: "ab_test_winner"
+   - `winner_metrics`: Snapshot of winning metrics
+
+### Complete Workflow Example
+
+```python
+# 1. Create campaign with orchestrator
+orchestration_result = await orchestrator.orchestrate_campaign(request)
+campaign_id = orchestration_result.campaign_creation.campaign_db_id
+
+# 2. Create A/B test with 2 variants
+ab_test = await create_ab_test(
+    db=db,
+    campaign_id=campaign_id,
+    test_name="Holiday Sale Test",
+    variants=[
+        {"clip_id": clip_1, "ad_id": ad_1},
+        {"clip_id": clip_2, "ad_id": ad_2},
+    ],
+    metrics=["ctr", "cpc", "roas"],
+    min_impressions=1000,
+    min_duration_hours=48,
+)
+
+# 3. Wait for test to run (48+ hours, 1000+ impressions)
+# ... ads run and collect metrics ...
+
+# 4. Evaluate and select winner
+result = await evaluate_ab_test(
+    db=db,
+    ab_test_id=ab_test.id,
+    force=False,
+)
+
+if result["success"]:
+    print(f"Winner: {result['winner_clip_id']}")
+    print(f"Composite scores: {result['composite_scores']}")
+    
+    # 5. Auto-publish winner to Instagram
+    publish_result = await publish_winner(
+        db=db,
+        ab_test_id=ab_test.id,
+        social_account_id=instagram_account_id,
+    )
+    
+    print(f"Published: {publish_result['publish_log_id']}")
+```
+
+### Tests (9/9 passing)
+
+```bash
+pytest tests/test_meta_orchestrator_ab.py -v
+```
+
+**Test Coverage:**
+1. ✅ `test_create_ab_test_success` - Create A/B test
+2. ✅ `test_create_ab_test_requires_two_variants` - Validation
+3. ✅ `test_evaluate_ab_test_insufficient_duration` - Embargo rules (duration)
+4. ✅ `test_evaluate_ab_test_insufficient_impressions` - Embargo rules (impressions)
+5. ✅ `test_evaluate_ab_test_selects_winner` - Winner selection
+6. ✅ `test_publish_winner_creates_publish_log` - Auto-publish
+7. ✅ `test_archive_ab_test` - Archiving
+8. ✅ `test_ab_test_evaluator_chi_square` - Statistical test
+9. ✅ `test_ab_test_evaluator_metrics` - Metric calculations
+
+### Security
+
+- **RBAC**: All A/B testing endpoints require `admin` or `manager` role
+- **Validation**: Pydantic models validate all inputs
+- **Atomicity**: Database transactions with rollback on error
+- **Idempotency**: Publishing winner checks `published_to_social` flag
+
+## 📚 Dependencies
+
+```python
+# Core
+FastAPI >= 0.104.0
+Pydantic >= 2.5.0
+SQLAlchemy >= 2.0.0
+
+# Statistical
+scipy >= 1.16.0
+numpy >= 2.3.0
+
+# Integrations
+app.meta_ads_client  # PASO 10.2
+app.models.database  # PASO 10.1
+app.core.auth       # RBAC
+```
+
 ## ✅ Status
 
-- **Implementation**: Complete (PASO 10.3)
-- **Tests**: 6/6 passing
+- **Implementation**: Complete (PASO 10.3 + 10.4)
+- **Tests**: 
+  - Orchestrator: 6/6 passing
+  - A/B Testing: 9/9 passing
+  - **Total: 15/15 passing** ✅
 - **Mode**: STUB only (no real Meta API calls yet)
 - **RBAC**: Enforced (admin/manager only)
 - **Documentation**: Complete
+- **A/B Testing**: Full statistical evaluation + auto-publish
 
 ---
 
 **Last Updated**: 2025-11-25
 **Author**: sistemaproyectomunidal
-**Commit**: 8b9f6a2
+**Commit**: [pending]

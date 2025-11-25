@@ -48,6 +48,7 @@ from app.models.database import (
     MetaAdsetModel,
     MetaAdModel,
     MetaAdInsightsModel,
+    MetaAbTestModel,
 )
 
 # Test database URL
