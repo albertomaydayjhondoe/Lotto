@@ -227,6 +227,10 @@ app.include_router(ai_global_router, tags=["ai_global_worker"])
 # Visual Analytics endpoints (PASO 8.3)
 app.include_router(visual_analytics_router, tags=["visual_analytics"])
 
+# Meta Ads ROAS Engine endpoints (PASO 10.5)
+from app.meta_ads_orchestrator.roas_router import router as roas_router
+app.include_router(roas_router, tags=["meta_roas"])
+
 # Debug endpoints (DEVELOPMENT ONLY)
 # WARNING: In production, these endpoints should be protected with authentication
 # or disabled by setting DEBUG_ENDPOINTS_ENABLED=False in config

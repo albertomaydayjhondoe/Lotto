@@ -789,3 +789,236 @@ class MetaAbTestModel(Base):
     
     def __repr__(self):
         return f"<MetaAbTest(id={self.id}, test_name={self.test_name}, status={self.status})>"
+
+
+class MetaPixelOutcomeModel(Base):
+    """
+    Pixel-based conversion outcomes from Meta Pixel events.
+    
+    Tracks user actions on landing pages/websites after clicking ads.
+    Used for ROAS calculation and conversion attribution.
+    """
+    __tablename__ = "meta_pixel_outcomes"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    
+    # Pixel and event information
+    pixel_id = Column(String(255), nullable=False, index=True)
+    event_id = Column(String(255), nullable=True, unique=True)  # Deduplication
+    event_name = Column(String(100), nullable=False, index=True)  # ViewContent, AddToCart, Purchase, Lead, etc.
+    
+    # Ad attribution
+    ad_id = Column(UUID(as_uuid=True), ForeignKey("meta_ads.id"), nullable=True, index=True)
+    adset_id = Column(UUID(as_uuid=True), ForeignKey("meta_adsets.id"), nullable=True, index=True)
+    campaign_id = Column(UUID(as_uuid=True), ForeignKey("meta_campaigns.id"), nullable=False, index=True)
+    
+    # Conversion details
+    conversion_type = Column(String(100), nullable=False, index=True)  # add_to_cart, purchase, lead, signup, etc.
+    value_usd = Column(Float, nullable=True, default=0.0)  # Conversion value in USD
+    currency = Column(String(10), nullable=True, default="USD")
+    quantity = Column(Integer, nullable=True, default=1)
+    
+    # Session information
+    session_id = Column(String(255), nullable=True, index=True)
+    session_duration_seconds = Column(Integer, nullable=True)
+    landing_path = Column(String(500), nullable=True)
+    referrer = Column(String(500), nullable=True)
+    
+    # Device and location
+    device_type = Column(String(50), nullable=True)  # mobile, desktop, tablet
+    platform = Column(String(50), nullable=True)  # ios, android, web
+    country = Column(String(10), nullable=True)
+    city = Column(String(100), nullable=True)
+    
+    # UTM tracking
+    utm_source = Column(String(255), nullable=True, index=True)
+    utm_medium = Column(String(255), nullable=True)
+    utm_campaign = Column(String(255), nullable=True, index=True)
+    utm_content = Column(String(255), nullable=True)
+    utm_term = Column(String(255), nullable=True)
+    
+    # Attribution and confidence
+    attribution_model = Column(String(50), nullable=False, default="last_click")  # last_click, first_click, linear, time_decay
+    attribution_weight = Column(Float, nullable=False, default=1.0)  # 0.0 to 1.0 for multi-touch attribution
+    confidence_score = Column(Float, nullable=True)  # 0.0 to 1.0 probability that this is a real conversion
+    
+    # Timing
+    event_timestamp = Column(DateTime, nullable=False, index=True)
+    click_timestamp = Column(DateTime, nullable=True)  # Time of ad click
+    time_to_conversion_seconds = Column(Integer, nullable=True)  # Time from click to conversion
+    
+    # Metadata
+    extra_data = Column(JSON, nullable=True)  # Additional pixel data
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    
+    # Relationships
+    ad = relationship("MetaAdModel", foreign_keys=[ad_id])
+    adset = relationship("MetaAdsetModel", foreign_keys=[adset_id])
+    campaign = relationship("MetaCampaignModel", foreign_keys=[campaign_id])
+    
+    def __repr__(self):
+        return f"<MetaPixelOutcome(id={self.id}, event={self.event_name}, value=${self.value_usd})>"
+
+
+class MetaConversionEventModel(Base):
+    """
+    Aggregated conversion events per ad/adset/campaign.
+    
+    Provides pre-computed conversion metrics for faster ROAS calculations.
+    Updated periodically from MetaPixelOutcomeModel.
+    """
+    __tablename__ = "meta_conversion_events"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    
+    # Ad hierarchy
+    ad_id = Column(UUID(as_uuid=True), ForeignKey("meta_ads.id"), nullable=True, index=True)
+    adset_id = Column(UUID(as_uuid=True), ForeignKey("meta_adsets.id"), nullable=True, index=True)
+    campaign_id = Column(UUID(as_uuid=True), ForeignKey("meta_campaigns.id"), nullable=False, index=True)
+    
+    # Date range for aggregation
+    date = Column(DateTime, nullable=False, index=True)  # Aggregation date (daily)
+    date_start = Column(DateTime, nullable=False)
+    date_end = Column(DateTime, nullable=False)
+    
+    # Conversion metrics
+    total_conversions = Column(Integer, nullable=False, default=0)
+    total_revenue_usd = Column(Float, nullable=False, default=0.0)
+    total_cost_usd = Column(Float, nullable=False, default=0.0)  # From insights
+    
+    # Conversion breakdown by type
+    purchases = Column(Integer, nullable=False, default=0)
+    leads = Column(Integer, nullable=False, default=0)
+    add_to_carts = Column(Integer, nullable=False, default=0)
+    view_contents = Column(Integer, nullable=False, default=0)
+    initiates_checkout = Column(Integer, nullable=False, default=0)
+    
+    # Revenue breakdown
+    purchase_revenue_usd = Column(Float, nullable=False, default=0.0)
+    lead_value_usd = Column(Float, nullable=False, default=0.0)  # Estimated lead value
+    
+    # Calculated metrics
+    conversion_rate = Column(Float, nullable=True)  # conversions / clicks
+    cost_per_conversion = Column(Float, nullable=True)  # cost / conversions
+    roas = Column(Float, nullable=True)  # revenue / cost
+    average_order_value = Column(Float, nullable=True)  # revenue / purchases
+    
+    # Session metrics
+    average_session_duration = Column(Float, nullable=True)  # Average in seconds
+    bounce_rate = Column(Float, nullable=True)  # % of single-page sessions
+    
+    # Metadata
+    extra_metrics = Column(JSON, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    
+    # Relationships
+    ad = relationship("MetaAdModel", foreign_keys=[ad_id])
+    adset = relationship("MetaAdsetModel", foreign_keys=[adset_id])
+    campaign = relationship("MetaCampaignModel", foreign_keys=[campaign_id])
+    
+    # Unique constraint: one record per ad/adset/campaign per day
+    __table_args__ = (
+        UniqueConstraint('ad_id', 'date', name='uix_conversion_ad_date'),
+        UniqueConstraint('adset_id', 'date', name='uix_conversion_adset_date'),
+        UniqueConstraint('campaign_id', 'date', name='uix_conversion_campaign_date'),
+    )
+    
+    def __repr__(self):
+        return f"<MetaConversionEvent(id={self.id}, conversions={self.total_conversions}, roas={self.roas})>"
+
+
+class MetaROASMetricsModel(Base):
+    """
+    Advanced ROAS metrics with predictions and optimization recommendations.
+    
+    Combines insights data with pixel outcomes to provide:
+    - Real ROAS (from actual conversions)
+    - Predicted ROAS (from ML models)
+    - Optimization recommendations
+    - Statistical confidence intervals
+    """
+    __tablename__ = "meta_roas_metrics"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    
+    # Ad hierarchy
+    ad_id = Column(UUID(as_uuid=True), ForeignKey("meta_ads.id"), nullable=True, index=True)
+    adset_id = Column(UUID(as_uuid=True), ForeignKey("meta_adsets.id"), nullable=True, index=True)
+    campaign_id = Column(UUID(as_uuid=True), ForeignKey("meta_campaigns.id"), nullable=False, index=True)
+    
+    # Calculation period
+    date = Column(DateTime, nullable=False, index=True)
+    date_start = Column(DateTime, nullable=False)
+    date_end = Column(DateTime, nullable=False)
+    calculation_timestamp = Column(DateTime, default=datetime.utcnow, nullable=False)
+    
+    # Core ROAS metrics
+    actual_roas = Column(Float, nullable=True)  # Real ROAS from pixel outcomes
+    predicted_roas = Column(Float, nullable=True)  # ML-predicted ROAS
+    blended_roas = Column(Float, nullable=True)  # Weighted combination
+    
+    # Revenue and cost
+    total_revenue_usd = Column(Float, nullable=False, default=0.0)
+    total_cost_usd = Column(Float, nullable=False, default=0.0)
+    expected_revenue_usd = Column(Float, nullable=True)  # Predicted revenue
+    
+    # Conversion metrics
+    total_conversions = Column(Integer, nullable=False, default=0)
+    conversion_rate = Column(Float, nullable=True)
+    conversion_probability = Column(Float, nullable=True)  # Predicted probability
+    expected_conversions = Column(Float, nullable=True)  # Predicted count
+    
+    # Statistical confidence
+    confidence_score = Column(Float, nullable=True)  # 0.0 to 1.0
+    confidence_interval_low = Column(Float, nullable=True)  # Lower bound of ROAS CI
+    confidence_interval_high = Column(Float, nullable=True)  # Upper bound of ROAS CI
+    sample_size = Column(Integer, nullable=True)  # Number of data points
+    
+    # Bayesian smoothing
+    prior_roas = Column(Float, nullable=True)  # Prior belief
+    posterior_roas = Column(Float, nullable=True)  # Posterior after Bayesian update
+    smoothing_factor = Column(Float, nullable=True)  # Weight of prior
+    
+    # Performance indicators
+    is_outlier = Column(Integer, nullable=False, default=0)  # 1 if statistical outlier
+    outlier_reason = Column(String(255), nullable=True)  # Explanation
+    performance_tier = Column(String(50), nullable=True)  # excellent, good, average, poor, failing
+    
+    # Optimization recommendations
+    recommendation = Column(String(50), nullable=True)  # scale_up, scale_down, pause, monitor, test
+    recommended_budget_change_pct = Column(Float, nullable=True)  # -100 to +200 (percentage change)
+    recommended_daily_budget_usd = Column(Float, nullable=True)  # New recommended budget
+    
+    # Quality scores
+    session_quality_score = Column(Float, nullable=True)  # 0.0 to 100.0
+    user_retention_probability = Column(Float, nullable=True)  # 0.0 to 1.0
+    lifetime_value_estimate = Column(Float, nullable=True)  # Predicted LTV
+    
+    # Blended metrics (insights + outcomes)
+    blended_ctr = Column(Float, nullable=True)
+    blended_cpc = Column(Float, nullable=True)
+    blended_cpm = Column(Float, nullable=True)
+    
+    # Metadata
+    calculation_method = Column(String(100), nullable=True)  # bayesian, frequentist, ml_model, etc.
+    model_version = Column(String(50), nullable=True)  # Version of prediction model used
+    extra_data = Column(JSON, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    
+    # Relationships
+    ad = relationship("MetaAdModel", foreign_keys=[ad_id])
+    adset = relationship("MetaAdsetModel", foreign_keys=[adset_id])
+    campaign = relationship("MetaCampaignModel", foreign_keys=[campaign_id])
+    
+    # Unique constraint: one record per ad/adset/campaign per date
+    __table_args__ = (
+        UniqueConstraint('ad_id', 'date', name='uix_roas_ad_date'),
+        UniqueConstraint('adset_id', 'date', name='uix_roas_adset_date'),
+        UniqueConstraint('campaign_id', 'date', name='uix_roas_campaign_date'),
+    )
+    
+    def __repr__(self):
+        return f"<MetaROASMetrics(id={self.id}, actual_roas={self.actual_roas}, predicted_roas={self.predicted_roas})>"

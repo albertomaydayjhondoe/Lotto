@@ -182,6 +182,19 @@ def require_active_user(user: dict = Depends(get_current_user)) -> dict:
     return user
 
 
+def require_permission(scope: str):
+    """
+    Dependency to require a specific permission scope.
+    
+    Args:
+        scope: Required permission scope (e.g., "analytics:read")
+        
+    Returns:
+        Dependency function that checks for the scope
+    """
+    return require_scope(scope)
+
+
 # Convenience dependencies
 RequireAdmin = Depends(require_role("admin"))
 RequireManager = Depends(require_role("admin", "manager"))
