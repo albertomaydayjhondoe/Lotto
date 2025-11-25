@@ -231,6 +231,10 @@ app.include_router(visual_analytics_router, tags=["visual_analytics"])
 from app.meta_ads_orchestrator.roas_router import router as roas_router
 app.include_router(roas_router, tags=["meta_roas"])
 
+# Meta Optimization Loop endpoints (PASO 10.6)
+from app.meta_optimization.routes import router as optimization_router
+app.include_router(optimization_router, tags=["meta_optimization"])
+
 # Debug endpoints (DEVELOPMENT ONLY)
 # WARNING: In production, these endpoints should be protected with authentication
 # or disabled by setting DEBUG_ENDPOINTS_ENABLED=False in config
