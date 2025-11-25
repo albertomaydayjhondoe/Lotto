@@ -16,7 +16,39 @@ def visit_UUID(self, type_, **kw):
 
 sqlite_base.SQLiteTypeCompiler.visit_UUID = visit_UUID
 
-from app.models.database import Base
+# Import ALL models explicitly to ensure they are registered with Base.metadata
+# This is required for Base.metadata.create_all() to create all tables
+from app.models.database import (
+    Base,
+    # Core models
+    VideoAsset,
+    Clip,
+    ClipVariant,
+    Job,
+    Publication,
+    Campaign,
+    PlatformRule,
+    RuleEngineWeights,
+    BestClipDecisionModel,
+    # Social/Publishing models
+    SocialAccountModel,
+    PublishLogModel,
+    # Alert models
+    AlertEventModel,
+    # Auth models
+    UserModel,
+    RefreshTokenModel,
+    # AI models
+    AIReasoningHistoryModel,
+    # Meta Ads models (PASO 10.1)
+    MetaAccountModel,
+    MetaPixelModel,
+    MetaCreativeModel,
+    MetaCampaignModel,
+    MetaAdsetModel,
+    MetaAdModel,
+    MetaAdInsightsModel,
+)
 
 # Test database URL
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"

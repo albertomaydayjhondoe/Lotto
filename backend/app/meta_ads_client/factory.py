@@ -5,7 +5,8 @@ Factory function to create MetaAdsClient instances from database records.
 """
 
 import logging
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from .client import MetaAdsClient
 from .exceptions import MetaAuthError
@@ -13,8 +14,8 @@ from .exceptions import MetaAuthError
 logger = logging.getLogger(__name__)
 
 
-def get_meta_client_for_account(
-    db: Session,
+async def get_meta_client_for_account(
+    db: AsyncSession,
     social_account_id: int,
 ) -> MetaAdsClient:
     """
@@ -28,7 +29,7 @@ def get_meta_client_for_account(
     5. Creates and returns a configured MetaAdsClient
     
     Args:
-        db: Database session
+        db: Async database session
         social_account_id: ID of the SocialAccount record
         
     Returns:
@@ -42,12 +43,14 @@ def get_meta_client_for_account(
     from app.models.database import SocialAccountModel, MetaAccountModel
     
     # Fetch social account
-    social_account = db.query(SocialAccountModel).filter(
-        SocialAccountModel.id == social_account_id
-    ).first()
+    result = await db.execute(
+        select(SocialAccountModel).where(SocialAccountModel.id == social_account_id)
+    )
+    social_account = result.scalar_one_or_none()
     
     if not social_account:
-        raise ValueError(f"SocialAccount with id {social_account_id} not found")
+        logger.warning(f"SocialAccount {social_account_id} not found, returning stub client")
+        return MetaAdsClient(mode="stub")
     
     # Validate platform
     if social_account.platform.lower() not in ["meta", "facebook", "instagram"]:
@@ -56,37 +59,43 @@ def get_meta_client_for_account(
             f"(platform: {social_account.platform})"
         )
     
-    # Get access token
-    access_token = social_account.access_token
+    # Get access token from OAuth field
+    access_token = social_account.oauth_access_token
     if not access_token:
-        raise MetaAuthError(
-            f"SocialAccount {social_account_id} has no access token"
+        logger.warning(
+            f"SocialAccount {social_account_id} has no access token, returning stub client"
         )
+        return MetaAdsClient(mode="stub")
     
-    # Get ad account ID from platform_data
+    # Get ad account ID from MetaAccountModel if exists, or construct from social account
+    result = await db.execute(
+        select(MetaAccountModel).where(MetaAccountModel.social_account_id == social_account_id)
+    )
+    meta_account = result.scalar_one_or_none()
+    
     ad_account_id = None
-    if social_account.platform_data:
-        ad_account_id = social_account.platform_data.get("ad_account_id")
+    if meta_account:
+        ad_account_id = meta_account.ad_account_id
+    elif social_account.external_id:
+        # Try to construct from external_id if available
+        ad_account_id = f"act_{social_account.external_id}"
     
     if not ad_account_id:
-        # Try to construct from account_id if available
-        if hasattr(social_account, "account_id") and social_account.account_id:
-            ad_account_id = f"act_{social_account.account_id}"
-        else:
-            raise ValueError(
-                f"SocialAccount {social_account_id} has no ad_account_id in platform_data"
-            )
+        logger.warning(
+            f"SocialAccount {social_account_id} has no ad_account_id, will use default"
+        )
+        ad_account_id = "act_000000000000000"  # Fallback for stub mode
     
     # Determine mode based on environment or token validity
     # For now, default to STUB mode. In production, you would:
     # 1. Check if token is expired
     # 2. Validate token has required permissions
     # 3. Set to LIVE if valid, STUB otherwise
-    mode = "STUB"
+    mode = "stub"
     
     # You can add logic here to determine mode:
     # if _is_production_environment() and _is_token_valid(access_token):
-    #     mode = "LIVE"
+    #     mode = "live"
     
     logger.info(
         f"Creating MetaAdsClient for account {social_account_id} "
@@ -98,7 +107,6 @@ def get_meta_client_for_account(
         access_token=access_token,
         ad_account_id=ad_account_id,
         mode=mode,
-        api_version="v18.0",
     )
 
 
