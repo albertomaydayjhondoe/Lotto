@@ -40,6 +40,7 @@ from app.meta_optimization.routes import router as optimization_router
 from app.meta_autonomous.routes import router as autonomous_router
 from app.meta_insights_collector.router import router as insights_router
 from app.meta_insights_collector.scheduler import get_scheduler, start_meta_insights_scheduler
+from app.meta_autopublisher.router import router as autopublisher_router
 
 
 async def telemetry_broadcast_loop():
@@ -287,6 +288,9 @@ app.include_router(autonomous_router, tags=["meta_autonomous"])
 
 # Meta Insights Collector endpoints (PASO 10.7)
 app.include_router(insights_router, tags=["meta_insights"])
+
+# AutoPublisher endpoints (PASO 10.8)
+app.include_router(autopublisher_router, prefix="/meta/autopilot", tags=["meta_autopublisher"])
 
 # Debug endpoints (DEVELOPMENT ONLY)
 # WARNING: In production, these endpoints should be protected with authentication

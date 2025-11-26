@@ -96,6 +96,14 @@ class Settings(BaseSettings):
     META_INSIGHTS_MODE: str = "stub"  # "stub" or "live" - controls Meta API integration
     META_INSIGHTS_SYNC_INTERVAL_MINUTES: int = 30  # minutes between automatic syncs
     
+    # Meta AutoPublisher Configuration (PASO 10.8)
+    AUTO_PUBLISHER_ENABLED: bool = False  # Enable AutoPublisher system
+    META_API_MODE: str = "stub"  # "stub" or "live" - controls Meta API client mode
+    META_DEFAULT_AD_ACCOUNT_ID: str | None = None  # Default Meta ad account (act_...)
+    AUTO_PUBLISHER_MAX_CONCURRENT_RUNS: int = 5  # Max simultaneous autopilot runs
+    AUTO_PUBLISHER_DEFAULT_TEST_DURATION_HOURS: int = 24  # Default A/B test duration
+    AUTO_PUBLISHER_MIN_BUDGET_PER_VARIANT: float = 50.0  # Minimum budget per variant
+    
     class Config:
         case_sensitive = True
         env_file = ".env"
