@@ -92,6 +92,10 @@ class Settings(BaseSettings):
     # Security / Credentials Encryption (PASO 5.1)
     CREDENTIALS_ENCRYPTION_KEY: str | None = None  # Fernet key for encrypting social account credentials
     
+    # Meta Insights Collector Configuration (PASO 10.7)
+    META_INSIGHTS_MODE: str = "stub"  # "stub" or "live" - controls Meta API integration
+    META_INSIGHTS_SYNC_INTERVAL_MINUTES: int = 30  # minutes between automatic syncs
+    
     class Config:
         case_sensitive = True
         env_file = ".env"

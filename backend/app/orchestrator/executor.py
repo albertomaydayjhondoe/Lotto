@@ -8,6 +8,9 @@ from datetime import datetime, timedelta
 
 from app.orchestrator.decider import OrchestratorAction
 from app.models.database import Clip, PublishLogModel, Campaign, Job, JobStatus, CampaignStatus, ClipStatus
+
+# Add alias for consistency
+JobModel = Job
 from app.publishing_scheduler.scheduler import schedule_publication
 from app.publishing_intelligence.intelligence import auto_schedule_clip
 from app.publishing_reconciliation.recon import reconcile_publications

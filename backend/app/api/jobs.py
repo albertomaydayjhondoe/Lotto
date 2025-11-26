@@ -16,6 +16,7 @@ from app.core.database import get_db
 from app.services.job_worker import run_job
 from app.worker import process_single_job
 from app.auth.permissions import require_role
+from app.ledger.logging import log_job_event
 
 router = APIRouter()
 

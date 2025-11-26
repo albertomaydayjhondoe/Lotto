@@ -95,3 +95,52 @@ async def db_session(async_engine):
 async def async_db_session(db_session):
     """Alias for db_session for compatibility with different test files."""
     return db_session
+
+
+# HTTP Test Client Fixtures
+@pytest_asyncio.fixture
+async def client():
+    """Create HTTP test client."""
+    from httpx import AsyncClient
+    from fastapi import FastAPI
+    
+    # Create a minimal app with just the meta insights router for testing
+    app = FastAPI()
+    
+    # Mock auth dependencies for testing  
+    def mock_auth():
+        return {"user_id": "test_user", "roles": ["admin", "manager", "analytics:read"], "sub": "test_user"}
+    
+    # Import and add the meta insights router
+    from app.meta_insights_collector.router import router as meta_insights_router
+    from app.auth.permissions import require_role
+    
+    # Override all possible auth dependencies for tests
+    # This is a bit of a hack but works for testing
+    for roles in [["admin"], ["manager"], ["user"], ["analytics:read"], ["analytics:read", "manager", "admin"]]:
+        app.dependency_overrides[require_role(roles)] = mock_auth
+    
+    app.include_router(meta_insights_router, tags=["meta-insights"])
+    
+    async with AsyncClient(app=app, base_url="http://test") as ac:
+        yield ac
+
+
+@pytest_asyncio.fixture
+async def admin_headers():
+    """Create admin headers for testing."""
+    # Mock JWT token for admin role
+    return {
+        "Authorization": "Bearer admin_test_token",
+        "Content-Type": "application/json"
+    }
+
+
+@pytest_asyncio.fixture 
+async def user_headers():
+    """Create user headers for testing."""
+    # Mock JWT token for user role
+    return {
+        "Authorization": "Bearer user_test_token",
+        "Content-Type": "application/json"
+    }
