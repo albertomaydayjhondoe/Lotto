@@ -116,6 +116,18 @@ async def lifespan(app: FastAPI):
             interval_seconds=settings.AI_WORKER_INTERVAL_SECONDS
         )
     
+    # Start Meta Autonomous Worker if enabled (PASO 10.7)
+    meta_auto_worker_task = None
+    if settings.META_AUTO_ENABLED:
+        from app.meta_autonomous.auto_worker import MetaAutoWorker
+        from app.meta_autonomous.routes import set_worker
+        from app.core.database import AsyncSessionLocal
+        
+        meta_auto_worker = MetaAutoWorker(AsyncSessionLocal)
+        set_worker(meta_auto_worker)
+        meta_auto_worker.start()
+        meta_auto_worker_task = meta_auto_worker._task
+    
     yield
     
     # Shutdown
@@ -138,6 +150,14 @@ async def lifespan(app: FastAPI):
         await stop_ai_worker_loop()
         try:
             await ai_worker_task
+        except asyncio.CancelledError:
+            pass
+    
+    # Stop Meta Autonomous Worker
+    if meta_auto_worker_task:
+        try:
+            meta_auto_worker_task.cancel()
+            await meta_auto_worker_task
         except asyncio.CancelledError:
             pass
 
@@ -234,6 +254,10 @@ app.include_router(roas_router, tags=["meta_roas"])
 # Meta Optimization Loop endpoints (PASO 10.6)
 from app.meta_optimization.routes import router as optimization_router
 app.include_router(optimization_router, tags=["meta_optimization"])
+
+# Meta Autonomous System endpoints (PASO 10.7)
+from app.meta_autonomous.routes import router as autonomous_router
+app.include_router(autonomous_router, tags=["meta_autonomous"])
 
 # Debug endpoints (DEVELOPMENT ONLY)
 # WARNING: In production, these endpoints should be protected with authentication

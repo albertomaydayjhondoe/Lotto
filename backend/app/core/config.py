@@ -65,6 +65,11 @@ class Settings(BaseSettings):
     AI_WORKER_ENABLED: bool = True  # enable AI global worker
     AI_WORKER_INTERVAL_SECONDS: int = 30  # seconds between AI reasoning cycles
     
+    # Meta Autonomous System Configuration (PASO 10.7)
+    META_AUTO_ENABLED: bool = True  # enable Meta autonomous worker
+    META_AUTO_INTERVAL_SECONDS: int = 1800  # seconds between optimization cycles (30 min)
+    META_AUTO_MODE: str = "suggest"  # "suggest" or "auto" - controls execution mode
+    
     # AI History Configuration (PASO 8.1)
     AI_HISTORY_MAX_LIMIT: int = 100  # max items per history query
     
