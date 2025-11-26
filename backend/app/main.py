@@ -33,6 +33,11 @@ from app.visual_analytics import router as visual_analytics_router
 from app.core.config import settings
 from app.core.database import init_db, get_db
 
+# Meta Ads modules (PASO 10.5, 10.6, 10.7)
+from app.meta_ads_orchestrator.roas_router import router as roas_router
+from app.meta_optimization.routes import router as optimization_router
+from app.meta_autonomous.routes import router as autonomous_router
+
 
 async def telemetry_broadcast_loop():
     """
@@ -248,15 +253,12 @@ app.include_router(ai_global_router, tags=["ai_global_worker"])
 app.include_router(visual_analytics_router, tags=["visual_analytics"])
 
 # Meta Ads ROAS Engine endpoints (PASO 10.5)
-from app.meta_ads_orchestrator.roas_router import router as roas_router
 app.include_router(roas_router, tags=["meta_roas"])
 
 # Meta Optimization Loop endpoints (PASO 10.6)
-from app.meta_optimization.routes import router as optimization_router
 app.include_router(optimization_router, tags=["meta_optimization"])
 
 # Meta Autonomous System endpoints (PASO 10.7)
-from app.meta_autonomous.routes import router as autonomous_router
 app.include_router(autonomous_router, tags=["meta_autonomous"])
 
 # Debug endpoints (DEVELOPMENT ONLY)
