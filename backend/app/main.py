@@ -53,6 +53,8 @@ from app.meta_creative_analyzer.router import router as creative_analyzer_router
 from app.meta_creative_analyzer.scheduler import start_creative_analyzer_scheduler, stop_creative_analyzer_scheduler
 from app.meta_creative_optimizer.router import router as creative_optimizer_router
 from app.meta_creative_optimizer.scheduler import start_creative_optimizer_scheduler, stop_creative_optimizer_scheduler
+from app.meta_creative_production.router import router as creative_production_router
+from app.meta_creative_production.scheduler import start_creative_production_scheduler, stop_creative_production_scheduler
 
 
 async def telemetry_broadcast_loop():
@@ -214,6 +216,15 @@ async def lifespan(app: FastAPI):
             logger = logging.getLogger(__name__)
             logger.warning(f"Meta Creative Optimizer Scheduler not started: {e}")
     
+    # Start Meta Creative Production Scheduler if enabled (PASO 10.17)
+    creative_production_task = None
+    if getattr(settings, 'CREATIVE_PRODUCTION_ENABLED', False):
+        try:
+            creative_production_task = await start_creative_production_scheduler()
+        except Exception as e:
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Meta Creative Production Scheduler not started: {e}")
+    
     yield
     
     # Shutdown
@@ -280,6 +291,13 @@ async def lifespan(app: FastAPI):
     if creative_optimizer_task:
         try:
             await stop_creative_optimizer_scheduler(creative_optimizer_task)
+        except asyncio.CancelledError:
+            pass
+    
+    # Stop Meta Creative Production Scheduler
+    if creative_production_task:
+        try:
+            await stop_creative_production_scheduler(creative_production_task)
         except asyncio.CancelledError:
             pass
 
@@ -388,6 +406,9 @@ app.include_router(creative_analyzer_router, prefix="/meta/creative-analyzer", t
 
 # Creative Optimizer endpoints (PASO 10.16)
 app.include_router(creative_optimizer_router, prefix="/meta/creative-optimizer", tags=["meta_creative_optimizer"])
+
+# Creative Production endpoints (PASO 10.17)
+app.include_router(creative_production_router, prefix="/meta/creative-production", tags=["meta_creative_production"])
 
 # Debug endpoints (DEVELOPMENT ONLY)
 # Meta Insights Collector endpoints (PASO 10.7)
