@@ -34,7 +34,7 @@ from app.visual_analytics import router as visual_analytics_router
 from app.core.config import settings
 from app.core.database import init_db, get_db
 
-# Meta Ads modules (PASO 10.5, 10.6, 10.7, 10.8, 10.9, 10.10, 10.11, 10.12)
+# Meta Ads modules (PASO 10.5, 10.6, 10.7, 10.8, 10.9, 10.10, 10.11, 10.12, 10.13)
 from app.meta_ads_orchestrator.roas_router import router as roas_router
 from app.meta_optimization.routes import router as optimization_router
 from app.meta_autonomous.routes import router as autonomous_router
@@ -47,6 +47,8 @@ from app.meta_full_cycle.router import router as full_cycle_router
 from app.meta_full_cycle.scheduler import start_meta_cycle_scheduler, stop_meta_cycle_scheduler
 from app.meta_targeting_optimizer.router import router as targeting_optimizer_router
 from app.meta_targeting_optimizer.scheduler import start_targeting_optimizer_scheduler, stop_targeting_optimizer_scheduler
+from app.meta_creative_intelligence.router import router as creative_intelligence_router
+from app.meta_creative_intelligence.scheduler import start_creative_intelligence_scheduler, stop_creative_intelligence_scheduler
 
 
 async def telemetry_broadcast_loop():
@@ -172,6 +174,18 @@ async def lifespan(app: FastAPI):
             logger = logging.getLogger(__name__)
             logger.warning(f"Meta Targeting Optimizer Scheduler not started: {e}")
     
+    # Start Meta Creative Intelligence Scheduler if enabled (PASO 10.13)
+    creative_intelligence_task = None
+    if getattr(settings, 'CREATIVE_INTELLIGENCE_ENABLED', False):
+        try:
+            creative_intelligence_task = await start_creative_intelligence_scheduler(
+                interval_hours=getattr(settings, 'CREATIVE_INTELLIGENCE_INTERVAL_HOURS', 12),
+                mode=getattr(settings, 'CREATIVE_INTELLIGENCE_MODE', 'stub')
+            )
+        except Exception as e:
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Meta Creative Intelligence Scheduler not started: {e}")
+    
     yield
     
     # Shutdown
@@ -206,15 +220,6 @@ async def lifespan(app: FastAPI):
             pass
     
     # Stop Meta Insights Scheduler
-    if meta_insights_task:
-        try:
-            scheduler = get_scheduler(mode=settings.META_INSIGHTS_MODE)
-            scheduler.stop()
-            meta_insights_task.cancel()
-            await meta_insights_task
-        except asyncio.CancelledError:
-            pass
-    
     # Stop Meta Full Cycle Scheduler
     if meta_cycle_task:
         try:
@@ -226,6 +231,13 @@ async def lifespan(app: FastAPI):
     if targeting_optimizer_task:
         try:
             await stop_targeting_optimizer_scheduler(targeting_optimizer_task)
+        except asyncio.CancelledError:
+            pass
+    
+    # Stop Meta Creative Intelligence Scheduler
+    if creative_intelligence_task:
+        try:
+            await stop_creative_intelligence_scheduler(creative_intelligence_task)
         except asyncio.CancelledError:
             pass
 
@@ -325,6 +337,9 @@ app.include_router(full_cycle_router, prefix="/meta/full-cycle", tags=["meta_ful
 
 # Targeting Optimizer endpoints (PASO 10.12)
 app.include_router(targeting_optimizer_router, prefix="/meta/targeting", tags=["meta_targeting_optimizer"])
+
+# Creative Intelligence endpoints (PASO 10.13)
+app.include_router(creative_intelligence_router, prefix="/meta/creative-intelligence", tags=["meta_creative_intelligence"])
 
 # Debug endpoints (DEVELOPMENT ONLY)
 # Meta Insights Collector endpoints (PASO 10.7)
