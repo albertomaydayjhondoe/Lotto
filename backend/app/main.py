@@ -34,13 +34,15 @@ from app.visual_analytics import router as visual_analytics_router
 from app.core.config import settings
 from app.core.database import init_db, get_db
 
-# Meta Ads modules (PASO 10.5, 10.6, 10.7)
+# Meta Ads modules (PASO 10.5, 10.6, 10.7, 10.8, 10.9, 10.10)
 from app.meta_ads_orchestrator.roas_router import router as roas_router
 from app.meta_optimization.routes import router as optimization_router
 from app.meta_autonomous.routes import router as autonomous_router
 from app.meta_insights_collector.router import router as insights_router
 from app.meta_insights_collector.scheduler import get_scheduler, start_meta_insights_scheduler
 from app.meta_autopublisher.router import router as autopublisher_router
+from app.meta_budget_spike.router import router as budget_spike_router
+from app.meta_creative_variants.router import router as creative_variants_router
 
 
 async def telemetry_broadcast_loop():
@@ -291,6 +293,12 @@ app.include_router(insights_router, tags=["meta_insights"])
 
 # AutoPublisher endpoints (PASO 10.8)
 app.include_router(autopublisher_router, prefix="/meta/autopilot", tags=["meta_autopublisher"])
+
+# Budget SPIKE Manager endpoints (PASO 10.9)
+app.include_router(budget_spike_router, prefix="/meta/budget-spikes", tags=["meta_budget_spike"])
+
+# Creative Variants Engine endpoints (PASO 10.10)
+app.include_router(creative_variants_router, prefix="/meta/creative-variants", tags=["meta_creative_variants"])
 
 # Debug endpoints (DEVELOPMENT ONLY)
 # WARNING: In production, these endpoints should be protected with authentication
