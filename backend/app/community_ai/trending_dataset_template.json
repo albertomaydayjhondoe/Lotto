@@ -1,0 +1,99 @@
+{
+  "tiktok": {
+    "top_sounds": [
+      {
+        "sound_id": "",
+        "name": "",
+        "usage_count": 0,
+        "trend_score": 0.0,
+        "brand_fit": 0.0
+      }
+    ],
+    "top_edits": [
+      {
+        "edit_style": "",
+        "description": "",
+        "popularity": 0.0,
+        "brand_fit": 0.0
+      }
+    ],
+    "visual_patterns": [
+      {
+        "pattern_type": "",
+        "description": "",
+        "examples": [],
+        "brand_fit": 0.0
+      }
+    ],
+    "narrative_patterns": [
+      {
+        "story_type": "",
+        "hook": "",
+        "structure": "",
+        "brand_fit": 0.0
+      }
+    ]
+  },
+  "instagram": {
+    "reels_trends": [
+      {
+        "trend_name": "",
+        "format": "",
+        "engagement_avg": 0.0,
+        "brand_fit": 0.0
+      }
+    ],
+    "color_patterns": [
+      {
+        "palette": [],
+        "mood": "",
+        "usage_frequency": 0.0,
+        "brand_fit": 0.0
+      }
+    ],
+    "camera_movements": [
+      {
+        "movement_type": "",
+        "description": "",
+        "popularity": 0.0,
+        "brand_fit": 0.0
+      }
+    ]
+  },
+  "youtube": {
+    "shorts_trends": [
+      {
+        "trend_name": "",
+        "format": "",
+        "avg_views": 0,
+        "brand_fit": 0.0
+      }
+    ],
+    "viral_stories": [
+      {
+        "story_structure": "",
+        "hook_type": "",
+        "retention_rate": 0.0,
+        "brand_fit": 0.0
+      }
+    ],
+    "repeatable_hooks": [
+      {
+        "hook_template": "",
+        "effectiveness": 0.0,
+        "brand_fit": 0.0
+      }
+    ]
+  },
+  "global_patterns": [
+    {
+      "pattern_id": "",
+      "name": "",
+      "description": "",
+      "platforms": [],
+      "growth_rate": 0.0,
+      "brand_fit": 0.0,
+      "recommended_action": ""
+    }
+  ]
+}

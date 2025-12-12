@@ -1,0 +1,239 @@
+==============================================
+LÍNEA MAESTRA DE DESARROLLO - STAKAZO
+==============================================
+
+Documento Rector del Proyecto STAKAZO
+Versión: 1.0
+Fecha: 2025-12-05
+Autor: Sistema de Gobernanza STAKAZO
+
+==============================================
+I. PROPÓSITO Y ALCANCE
+==============================================
+
+Este documento establece la línea maestra de desarrollo para el proyecto STAKAZO,
+definiendo principios, procesos y estándares que garantizan:
+
+1. Calidad consistente del código
+2. Seguridad de la información
+3. Escalabilidad del sistema
+4. Mantenibilidad a largo plazo
+5. Colaboración efectiva del equipo
+
+==============================================
+II. PRINCIPIOS FUNDAMENTALES
+==============================================
+
+1. SEGURIDAD PRIMERO
+   - Nunca commit secretos, tokens o credenciales
+   - Usar variables de entorno para configuración sensible
+   - Implementar autenticación y autorización en todos los endpoints
+   - Validar y sanitizar todas las entradas de usuario
+
+2. CÓDIGO LIMPIO Y DOCUMENTADO
+   - Seguir PEP 8 para Python
+   - Documentar funciones con docstrings
+   - Mantener archivos pequeños y enfocados
+   - Usar nombres descriptivos para variables y funciones
+
+3. TESTING OBLIGATORIO
+   - Cobertura mínima de 70% para código nuevo
+   - Tests unitarios para lógica de negocio
+   - Tests de integración para APIs
+   - Tests de regresión antes de cada release
+
+4. VERSIONADO Y TRAZABILIDAD
+   - Usar semantic versioning (MAJOR.MINOR.PATCH)
+   - Commits atómicos y descriptivos
+   - Referencias a issues en commits
+   - Mantener CHANGELOG.md actualizado
+
+==============================================
+III. ARQUITECTURA Y ESTRUCTURA
+==============================================
+
+A) Estructura de Directorios
+
+/backend
+  /app
+    /api         - Endpoints REST
+    /core        - Lógica central
+    /models      - Modelos de datos
+    /services    - Servicios de negocio
+    /prompts     - Plantillas de prompts AI
+  /tests         - Suite de pruebas
+  /alembic       - Migraciones de BD
+
+/docs            - Documentación del proyecto
+/scripts         - Scripts de automatización
+/.github         - Workflows CI/CD
+
+B) Fases del Proyecto
+
+- Phase 1: Content Intelligence (DEPRECATED - NO USAR)
+- Phase 2: Music Engine (ACTIVO)
+- Phase 3: Brain/Orchestrator (ACTIVO)
+- Phase 4: Outreach Intelligence (STUB MODE)
+- Phase 5+: Future expansions
+
+==============================================
+IV. FLUJO DE TRABAJO (WORKFLOW)
+==============================================
+
+1. DESARROLLO
+   a) Crear feature branch desde MAIN
+   b) Implementar cambios siguiendo checklist
+   c) Ejecutar tests localmente
+   d) Commit con mensaje descriptivo
+   e) Push a feature branch
+
+2. INTEGRACIÓN
+   a) Crear Pull Request a integracion/cto-ready
+   b) Ejecutar validación automática
+   c) Code review por al menos 1 reviewer
+   d) Resolver comentarios y conflictos
+   e) Merge a integracion/cto-ready
+
+3. DESPLIEGUE
+   a) Validación completa en integracion/cto-ready
+   b) Aprobación de CTO/Tech Lead
+   c) Merge a MAIN
+   d) Tag de versión
+   e) Deploy a producción
+
+==============================================
+V. ESTÁNDARES DE CÓDIGO
+==============================================
+
+A) Python
+   - PEP 8 compliance
+   - Type hints obligatorios
+   - Docstrings en Google format
+   - Max line length: 100 caracteres
+   - Import order: stdlib, third-party, local
+
+B) APIs
+   - RESTful design principles
+   - Versionado en URL (/api/v1/)
+   - Status codes HTTP apropiados
+   - Documentación OpenAPI/Swagger
+   - Rate limiting implementado
+
+C) Base de Datos
+   - Migraciones versionadas (Alembic)
+   - Índices en columnas frecuentemente consultadas
+   - Foreign keys con ON DELETE CASCADE cuando aplique
+   - Nombres descriptivos (snake_case)
+
+==============================================
+VI. SEGURIDAD Y COMPLIANCE
+==============================================
+
+1. DATOS SENSIBLES
+   - Nunca en código fuente
+   - Usar .env files (gitignored)
+   - Secrets management (AWS Secrets Manager, etc.)
+   - Rotación periódica de credenciales
+
+2. AUTENTICACIÓN Y AUTORIZACIÓN
+   - JWT tokens con expiración
+   - Role-based access control (RBAC)
+   - Rate limiting por usuario/IP
+   - Logging de accesos
+
+3. VALIDACIÓN DE DATOS
+   - Pydantic models para request/response
+   - Sanitización de inputs
+   - SQL injection prevention
+   - XSS protection
+
+==============================================
+VII. MONITOREO Y OBSERVABILIDAD
+==============================================
+
+1. LOGGING
+   - Niveles: DEBUG, INFO, WARNING, ERROR, CRITICAL
+   - Formato estructurado (JSON)
+   - Correlation IDs para trazabilidad
+   - No loggear datos sensibles
+
+2. MÉTRICAS
+   - Response times
+   - Error rates
+   - Throughput
+   - Resource utilization
+
+3. ALERTAS
+   - Errores críticos → Slack/Email inmediato
+   - Degradación de performance → Notificación 15min
+   - Recursos al límite → Notificación 30min
+
+==============================================
+VIII. PROMPT ENGINEERING
+==============================================
+
+Todas las interacciones con modelos AI deben:
+
+1. Usar templates versionados (backend/app/prompts/)
+2. Incluir prompt_version en metadata
+3. Loggear prompts y respuestas
+4. Implementar fallback mechanisms
+5. Validar respuestas del modelo
+6. Incluir ejemplos de few-shot learning
+7. Mantener context window dentro de límites
+
+==============================================
+IX. CHECKLIST DE VALIDACIÓN
+==============================================
+
+Ver archivo complementario: docs/CHECKLIST_OBLIGATORIO.md
+
+El checklist incluye validaciones obligatorias para:
+- Calidad de código
+- Seguridad
+- Testing
+- Documentación
+- Performance
+- Prompt engineering
+
+==============================================
+X. CONTACTOS Y RESPONSABILIDADES
+==============================================
+
+CTO/Tech Lead: @sistemaproyectomunidal
+Security Owner: [TBD]
+DevOps Lead: [TBD]
+QA Lead: [TBD]
+
+==============================================
+XI. PROCESO DE ACTUALIZACIÓN
+==============================================
+
+Este documento es un living document. Cambios requieren:
+
+1. Propuesta por escrito con justificación
+2. Review por Tech Lead
+3. Aprobación de CTO
+4. Comunicación al equipo
+5. Update de versión y fecha
+
+==============================================
+XII. ENFORCEMENT
+==============================================
+
+El cumplimiento de esta línea maestra se garantiza mediante:
+
+1. GitHub Actions workflows automáticos
+2. Pre-commit hooks
+3. Code review obligatorio
+4. Validación en CI/CD
+5. Reportes semanales de compliance
+
+Violaciones graves pueden resultar en:
+- Bloqueo automático de PR
+- Reversión de cambios
+- Escalación a Tech Lead/CTO
+
+==============================================
+FIN DEL DOCUMENTO
+==============================================

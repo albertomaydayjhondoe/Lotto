@@ -1,0 +1,176 @@
+{
+  "MODE": "STUB",
+  "version": "1.0.0",
+  "last_updated": "2025-11-28",
+  
+  "rate_limits": {
+    "/upload": {
+      "requests_per_minute": 10,
+      "per": "user",
+      "burst": 15,
+      "enabled": true
+    },
+    "/jobs": {
+      "requests_per_minute": 20,
+      "per": "user",
+      "burst": 30,
+      "enabled": true
+    },
+    "/campaigns": {
+      "requests_per_minute": 5,
+      "per": "account",
+      "burst": 10,
+      "enabled": true
+    },
+    "/api/meta/*": {
+      "requests_per_minute": 100,
+      "per": "token",
+      "burst": 150,
+      "enabled": true
+    },
+    "/api/memory_vault/*": {
+      "requests_per_minute": 50,
+      "per": "user",
+      "burst": 75,
+      "enabled": true
+    }
+  },
+  
+  "audio_processors": {
+    "mixchecker": {
+      "enabled": false,
+      "cost_per_1k_clips": 10.0,
+      "currency": "USD",
+      "budget_limit_usd": 1000,
+      "description": "Professional audio mix validation",
+      "stub_mode_behavior": "skip"
+    },
+    "gullfoss": {
+      "enabled": false,
+      "cost_monthly": 39.0,
+      "currency": "USD",
+      "license_type": "subscription",
+      "description": "Intelligent automatic EQ",
+      "stub_mode_behavior": "skip"
+    },
+    "loudness_normalizer": {
+      "enabled": false,
+      "cost_per_1k_clips": 2.0,
+      "currency": "USD",
+      "target_lufs": -14.0,
+      "description": "LUFS normalization for broadcast standards",
+      "stub_mode_behavior": "simulate"
+    }
+  },
+  
+  "audio_processors_by_env": {
+    "stub": {
+      "mixchecker": false,
+      "gullfoss": false,
+      "loudness_normalizer": false
+    },
+    "dev": {
+      "mixchecker": false,
+      "gullfoss": false,
+      "loudness_normalizer": true
+    },
+    "staging": {
+      "mixchecker": false,
+      "gullfoss": false,
+      "loudness_normalizer": true
+    },
+    "prod": {
+      "mixchecker": true,
+      "gullfoss": true,
+      "loudness_normalizer": true
+    }
+  },
+  
+  "features": {
+    "memory_vault": {
+      "enabled": true,
+      "mode": "STUB",
+      "description": "Google Drive-based feature storage"
+    },
+    "acl_enforcement": {
+      "enabled": true,
+      "mode": "STUB",
+      "strict_mode": false,
+      "description": "Role-based access control"
+    },
+    "backup_automation": {
+      "enabled": true,
+      "mode": "STUB",
+      "description": "Automated PostgreSQL and Memory Vault backups"
+    },
+    "legal_guardrails": {
+      "enabled": true,
+      "require_copyright_confirmation": true,
+      "require_terms_acceptance": true,
+      "description": "Copyright and legal compliance checks"
+    },
+    "redis_enhanced": {
+      "enabled": true,
+      "mode": "STUB",
+      "dead_letter_queue": true,
+      "retry_logic": true,
+      "description": "Enhanced Redis with namespaces and DLQ"
+    }
+  },
+  
+  "redis": {
+    "workers": 3,
+    "ttl_default_seconds": 1800,
+    "ttl_campaign_seconds": 7200,
+    "ttl_ml_jobs_seconds": 3600,
+    "ttl_upload_jobs_seconds": 600,
+    "ttl_session_seconds": 86400,
+    "max_retries": 3,
+    "backoff_base_seconds": 1.0,
+    "backoff_multiplier": 2.0,
+    "dlq_alert_threshold": 10
+  },
+  
+  "memory_vault": {
+    "root_path_stub": "/tmp/stakazo_memory_vault",
+    "root_path_live": "gdrive:/stakazo/memory_vault/",
+    "subfolders": [
+      "ml_features",
+      "audits",
+      "campaign_history",
+      "clips_metadata",
+      "orchestrator_runs"
+    ],
+    "retention_raw_days": 365,
+    "retention_summary_years": 5,
+    "naming_pattern": "{entity}__{date}_v{version}.json",
+    "encryption": "AES-256",
+    "kms_integration": false
+  },
+  
+  "backup": {
+    "postgres_frequency": "daily",
+    "postgres_retention_days": 30,
+    "postgres_time_utc": "02:00",
+    "vault_frequency": "monthly",
+    "vault_retention_months": 12,
+    "vault_time_utc": "03:00",
+    "restore_test_frequency": "quarterly",
+    "restore_test_environments": ["staging"]
+  },
+  
+  "monitoring": {
+    "enabled": true,
+    "dashboard_integration": true,
+    "alert_on_dlq_threshold": true,
+    "alert_on_backup_failure": true,
+    "alert_on_acl_violation": true
+  },
+  
+  "legal": {
+    "copyright_disclaimer_enabled": true,
+    "human_approval_required": true,
+    "approval_log_retention_days": 365,
+    "disclaimer_text": "⚠️ AVISO LEGAL: Todos los clips subidos deben contar con derechos de uso. El usuario es responsable de verificar permisos de copyright antes de publicar contenido en plataformas pagadas."
+  }
+}

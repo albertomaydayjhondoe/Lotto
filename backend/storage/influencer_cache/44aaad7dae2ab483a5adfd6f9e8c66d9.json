@@ -1,0 +1,36 @@
+{
+  "username": "@creator3",
+  "platform": "youtube",
+  "profile_url": "https://www.youtube.com/@creator3",
+  "metrics": {
+    "followers": 250000,
+    "avg_views": 45000,
+    "avg_likes": 2100,
+    "avg_comments": 320,
+    "avg_shares": 168.0,
+    "total_posts": 156,
+    "posting_frequency": "low",
+    "engagement_rate": 0.00968,
+    "view_to_follower_ratio": 0.18
+  },
+  "narrative_topics": [
+    "tech",
+    "reviews",
+    "tutorials"
+  ],
+  "video_styles": [
+    "talking-head",
+    "screen-recording",
+    "b-roll"
+  ],
+  "language": "es",
+  "verified": true,
+  "bio": "Tech reviews & tutorials",
+  "last_post_date": "2025-12-07T18:02:14.879344",
+  "cultural_markers": [
+    "latam",
+    "tech-savvy",
+    "educator"
+  ],
+  "scraped_at": "2025-12-12T18:02:14.879350"
+}

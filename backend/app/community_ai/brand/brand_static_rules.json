@@ -1,0 +1,408 @@
+{
+  "version": "1.0.0",
+  "artist_id": "stakazo_001",
+  "artist_name": "Stakazo",
+  "generated_at": "2024-12-07T10:00:00Z",
+  "artist_identity": {
+    "core_personality": [
+      "auténtico",
+      "introspectivo",
+      "visionario",
+      "implacable",
+      "misterioso"
+    ],
+    "emotional_palette": {
+      "transmit": [
+        "intensidad",
+        "misterio",
+        "poder",
+        "aspiracion",
+        "energia",
+        "oscuridad",
+        "ambicion"
+      ],
+      "avoid": [
+        "alegria_superficial",
+        "debilidad",
+        "contenido_generico",
+        "positividad_forzada",
+        "humor_ligero"
+      ]
+    },
+    "uniqueness_statement": "Combino la estética cyberpunk con trap urbano, creando un universo visual único donde el purple neon se convierte en firma. Mi música no es solo sonido, es una experiencia cinematográfica que transporta a la ciudad de noche, donde cada beat es un pulso urbano y cada visual cuenta una historia de ascenso desde las sombras.",
+    "inspirations": [
+      "Travis Scott",
+      "The Weeknd",
+      "Frank Ocean",
+      "Playboi Carti",
+      "Kanye West",
+      "Gesaffelstein",
+      "Daft Punk",
+      "James Blake"
+    ],
+    "philosophy": "Purple neon aesthetic is not just a color choice - it's a signature that represents the fusion of darkness and light, underground and aspiration, mystery and revelation."
+  },
+  "visual_rules": {
+    "color_palette": {
+      "allowed": [
+        "#8B44FF",
+        "#0A0A0A",
+        "#1A1A2E",
+        "#16213E",
+        "#E94560"
+      ],
+      "forbidden": [
+        "#FFB6C1",
+        "#FFF8DC",
+        "#FFFFE0",
+        "#FFD700",
+        "#FFA07A"
+      ],
+      "signature_color": "#8B44FF",
+      "color_match_threshold": 0.6
+    },
+    "visual_style": {
+      "keywords": [
+        "oscuro",
+        "futurista",
+        "cyberpunk",
+        "neon",
+        "urbano"
+      ],
+      "references": [
+        "Travis Scott - SICKO MODE",
+        "The Weeknd - Blinding Lights",
+        "Blade Runner 2049",
+        "Cyberpunk 2077 game aesthetic",
+        "Ghost in the Shell anime"
+      ]
+    },
+    "camera_work": {
+      "preferred_styles": [
+        "tracking_shots",
+        "slow_motion",
+        "close_ups",
+        "dutch_angles",
+        "POV"
+      ],
+      "forbidden_styles": []
+    },
+    "lighting": {
+      "preferred": [
+        "high_contrast",
+        "low_key",
+        "neon_lights",
+        "street_lights",
+        "darkness_with_accents"
+      ],
+      "signature": "high_contrast_neon"
+    },
+    "scenes": {
+      "allowed": [
+        "ciudad_noche",
+        "estudios_oscuros",
+        "calles_urbanas",
+        "azoteas",
+        "coches",
+        "espacios_minimalistas"
+      ],
+      "forbidden": [
+        "playa",
+        "bosque",
+        "dia_soleado",
+        "ambientes_naturales",
+        "espacios_rusticos"
+      ]
+    },
+    "editing": {
+      "preferred_styles": [
+        "fast_cuts_on_beat",
+        "smooth_transitions",
+        "glitch_effects",
+        "color_grading_cinematic",
+        "time_remapping"
+      ],
+      "forbidden_styles": [
+        "edits_genericos",
+        "transiciones_basicas",
+        "efectos_baratos",
+        "slideshows",
+        "exceso_de_texto"
+      ]
+    },
+    "wardrobe": {
+      "allowed": [
+        "hoodies_oscuros",
+        "leather_jackets",
+        "streetwear_premium",
+        "tech_wear",
+        "minimalist_black",
+        "masks_goggles"
+      ],
+      "forbidden": [
+        "ropa_colorida",
+        "deportiva_generica",
+        "formal_tradicional",
+        "estilo_casual_basico"
+      ],
+      "key_accessories": [
+        "máscaras LED purple",
+        "gafas futuristas",
+        "joyas plateadas mínimas",
+        "tech accessories",
+        "cadenas discretas"
+      ],
+      "aesthetic_keywords": [
+        "streetwear",
+        "cyberpunk",
+        "minimalista"
+      ]
+    }
+  },
+  "content_boundaries": {
+    "official_content": {
+      "allowed_types": [
+        "videoclips_oficiales",
+        "teasers_cinematicos",
+        "behind_scenes_premium",
+        "anuncios_lanzamientos",
+        "reels_alta_produccion",
+        "contenido_narrativo"
+      ],
+      "forbidden_types": [
+        "contenido_viral_generico",
+        "trends_sin_coherencia",
+        "edits_rapidos_lowquality",
+        "memes_casuales"
+      ],
+      "quality_threshold": 8
+    },
+    "narrative_rules": {
+      "allowed_stories": [
+        "rise_from_underground",
+        "personal_struggle",
+        "transformation",
+        "urban_solitude",
+        "ambition_journey",
+        "night_city_tales"
+      ],
+      "repeatable_themes": [
+        "noche",
+        "ciudad",
+        "ascenso",
+        "transformación",
+        "purple glow",
+        "soledad urbana",
+        "poder interior"
+      ],
+      "forbidden_narratives": [
+        "historias_genericas",
+        "romance_obvio",
+        "motivacion_cliche",
+        "narrativas_superficiales"
+      ],
+      "storytelling_style": [
+        "cinematico",
+        "simbolico",
+        "complejo_layers"
+      ]
+    },
+    "lyrical_themes": {
+      "allowed": [
+        "lucha_personal",
+        "ambicion",
+        "ciudad_noche",
+        "soledad",
+        "ascenso",
+        "reflexion",
+        "transformacion"
+      ],
+      "forbidden": [
+        "romance_superficial",
+        "contenido_motivacional_cliche",
+        "temas_genericos"
+      ]
+    },
+    "brand_compliance_threshold": 0.8,
+    "aesthetic_coherence_threshold": 0.7
+  },
+  "platform_guidelines": {
+    "posting_schedule": {
+      "frequency_per_week": 5,
+      "optimal_times": [
+        "20:00",
+        "21:30",
+        "23:00"
+      ],
+      "content_mix": {
+        "videoclips_oficiales": 30,
+        "teasers_previews": 25,
+        "behind_scenes": 15,
+        "reels_narrativos": 20,
+        "stories_aesthetic": 10
+      }
+    },
+    "instagram": {
+      "strategy": [
+        "reels_cinematicos",
+        "posts_aesthetic",
+        "stories_diarias"
+      ],
+      "format_priority": [
+        "reels",
+        "posts",
+        "stories"
+      ]
+    },
+    "tiktok": {
+      "strategy": [
+        "trends_adaptados",
+        "contenido_original",
+        "behind_scenes"
+      ],
+      "format_priority": [
+        "videos",
+        "series"
+      ]
+    },
+    "youtube": {
+      "strategy": [
+        "videoclips_oficiales",
+        "shorts_virales",
+        "making_of"
+      ],
+      "format_priority": [
+        "videos",
+        "shorts"
+      ]
+    },
+    "target_audience": {
+      "age_range": [
+        16,
+        28
+      ],
+      "characteristics": [
+        "urbanos",
+        "fans_trap_electronic",
+        "gamers",
+        "tech_savvy",
+        "nocturnos",
+        "anti_mainstream"
+      ],
+      "engagement_drivers": [
+        "estetica_unica",
+        "cinematografia_calidad",
+        "drops_inesperados",
+        "narrative_hooks",
+        "autenticidad"
+      ],
+      "platforms": [
+        "tiktok",
+        "instagram_reels",
+        "youtube_shorts",
+        "spotify"
+      ]
+    }
+  },
+  "music_context": {
+    "genres": [
+      "trap",
+      "electronic",
+      "experimental",
+      "alternative",
+      "ambient"
+    ],
+    "moods": [
+      "dark",
+      "intense",
+      "introspective",
+      "hypnotic",
+      "atmospheric"
+    ],
+    "vocal_style": [
+      "autotuned",
+      "melodic",
+      "layered",
+      "experimental"
+    ],
+    "primary_genre": "trap",
+    "signature_mood": "dark_atmospheric"
+  },
+  "brand_signature": {
+    "visual_dna": {
+      "signature_color": "#8B44FF",
+      "signature_aesthetic": "purple_neon_cyberpunk",
+      "visual_keywords": [
+        "oscuro",
+        "futurista",
+        "cyberpunk"
+      ]
+    },
+    "narrative_dna": {
+      "core_themes": [
+        "noche",
+        "ciudad",
+        "ascenso",
+        "transformación",
+        "purple glow"
+      ],
+      "storytelling_style": [
+        "cinematico",
+        "simbolico",
+        "complejo_layers"
+      ]
+    },
+    "recognizability_elements": [
+      "Purple neon glow (#8B44FF)",
+      "High contrast lighting",
+      "Urban night scenes",
+      "Cinematic camera work",
+      "Dark atmospheric mood"
+    ]
+  },
+  "quality_standards": {
+    "official_channel": {
+      "minimum_quality_score": 8,
+      "brand_compliance_required": true,
+      "aesthetic_coherence_required": true,
+      "narrative_depth_required": true
+    },
+    "experimentation": {
+      "tolerance_level": 7,
+      "trend_adoption_speed": 6,
+      "allowed_deviations": [
+        "new_editing_techniques",
+        "trend_adaptation_with_brand_filter",
+        "format_experimentation"
+      ]
+    },
+    "validation_gates": {
+      "color_palette_match": 0.6,
+      "brand_compliance": 0.8,
+      "aesthetic_coherence": 0.7,
+      "narrative_alignment": 0.7
+    }
+  },
+  "metrics_priorities": {
+    "primary_kpis": [
+      "retention_rate",
+      "engagement_rate",
+      "views",
+      "shares",
+      "comments_quality",
+      "follower_growth"
+    ],
+    "success_definition": "Un post exitoso es aquel que mantiene >70% de retention rate, genera conversación auténtica en comments, y logra shares orgánicos. No se trata solo de views, sino de crear conexión real con la audiencia que resuena con la estética y mensaje.",
+    "failure_tolerance": 3,
+    "optimization_focus": [
+      "retention_rate",
+      "engagement_quality",
+      "brand_coherence"
+    ],
+    "secondary_metrics": [
+      "follower_growth",
+      "share_rate",
+      "comment_sentiment"
+    ]
+  }
+}

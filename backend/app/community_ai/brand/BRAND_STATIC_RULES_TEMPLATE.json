@@ -1,0 +1,46 @@
+{
+  "artist_identity": {
+    "core_values": [],
+    "emotional_tone": [],
+    "forbidden_vibes": [],
+    "approved_aesthetic": [],
+    "forbidden_aesthetic": []
+  },
+
+  "visual_rules": {
+    "color_palette_allowed": [],
+    "color_palette_forbidden": [],
+    "camera_styles": [],
+    "editing_styles_allowed": [],
+    "editing_styles_forbidden": [],
+    "fashion_guidelines": [],
+    "forbidden_fashion": []
+  },
+
+  "content_boundaries": {
+    "allowed_formats": [],
+    "forbidden_formats": [],
+    "official_account_restrictions": [],
+    "satellite_account_restrictions": []
+  },
+
+  "platform_guidelines": {
+    "instagram": { "do": [], "avoid": [] },
+    "tiktok": { "do": [], "avoid": [] },
+    "youtube": { "do": [], "avoid": [] }
+  },
+
+  "music_context": {
+    "genres": [],
+    "moods": [],
+    "vocal_style": [],
+    "lyrical_themes": [],
+    "forbidden_themes": []
+  },
+
+  "brand_signature": {
+    "unique_elements": [],
+    "repeatable_patterns": [],
+    "storytelling_elements": []
+  }
+}

@@ -1,0 +1,459 @@
+openapi: "3.0.3"
+info:
+  title: Orquestador AI API
+  version: "0.1.0"
+  description: |
+    API para el Orquestador del Sistema Maestro de IA. Maneja uploads, jobs, clips,
+    confirmación de publicaciones y la integración con Meta Ads y webhooks de Instagram.
+servers:
+  - url: https://api.example.com
+    description: Replace with your Railway service URL
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: Invalid request
+    VideoUploadResponse:
+      type: object
+      properties:
+        video_asset_id:
+          type: string
+          format: uuid
+        job_id:
+          type: string
+          format: uuid
+        message:
+          type: string
+      required:
+        - video_asset_id
+        - job_id
+    Job:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        job_type:
+          type: string
+        status:
+          type: string
+        params:
+          type: object
+      required:
+        - id
+        - job_type
+        - status
+    Clip:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        start_ms:
+          type: integer
+        end_ms:
+          type: integer
+        duration_ms:
+          type: integer
+        visual_score:
+          type: number
+      required:
+        - id
+    ConfirmPublishRequest:
+      type: object
+      required:
+        - clip_id
+        - post_url
+        - post_id
+        - confirmed_by
+      properties:
+        clip_id:
+          type: string
+          format: uuid
+        platform:
+          type: string
+          example: instagram
+        post_url:
+          type: string
+        post_id:
+          type: string
+        published_at:
+          type: string
+          format: date-time
+        confirmed_by:
+          type: string
+          format: uuid
+        trace_id:
+          type: string
+          description: Idempotency / trace id for auditing
+    WebhookInstagramPayload:
+      type: object
+      properties:
+        object:
+          type: string
+        entry:
+          type: array
+          items:
+            type: object
+    CampaignCreate:
+      type: object
+      required:
+        - name
+        - clip_id
+        - budget_cents
+      properties:
+        name:
+          type: string
+        clip_id:
+          type: string
+          format: uuid
+        budget_cents:
+          type: integer
+        targeting:
+          type: object
+    PlatformRules:
+      type: object
+      properties:
+        id:
+          type: string
+        rules:
+          type: object
+
+paths:
+  /upload:
+    post:
+      summary: Upload a full videoclip and create initial analysis job
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                title:
+                  type: string
+                description:
+                  type: string
+                release_date:
+                  type: string
+                  format: date
+                idempotency_key:
+                  type: string
+            encoding:
+              file:
+                contentType: video/mp4
+      responses:
+        '201':
+          description: Uploaded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VideoUploadResponse'
+              examples:
+                success:
+                  summary: Successful upload
+                  value:
+                    video_asset_id: "11111111-1111-1111-1111-111111111111"
+                    job_id: "22222222-2222-2222-2222-222222222222"
+                    message: "Upload accepted, analysis job queued"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                missing_file:
+                  summary: Missing file field
+                  value:
+                    code: 400
+                    message: "file is required"
+      security:
+        - bearerAuth: []
+
+  /jobs:
+    post:
+      summary: Create an ad-hoc job (admin/service)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - job_type
+              properties:
+                job_type:
+                  type: string
+                clip_id:
+                  type: string
+                params:
+                  type: object
+                dedup_key:
+                  type: string
+            examples:
+              create_cut:
+                value:
+                  job_type: cut
+                  clip_id: null
+                  params:
+                    start_ms: 10000
+                  dedup_key: "cut-20251118-01"
+      responses:
+        '201':
+          description: Job created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+    get:
+      summary: List jobs (with filters)
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: created_by
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Job'
+
+  /jobs/{id}:
+    get:
+      summary: Get job status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: job
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+        '404':
+          description: not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                not_found:
+                  value:
+                    code: 404
+                    message: "job not found"
+
+  /clips:
+    get:
+      summary: List clips with filters
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: min_visual_score
+          in: query
+          schema:
+            type: number
+      responses:
+        '200':
+          description: clips
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Clip'
+
+  /clips/{id}/variants:
+    post:
+      summary: Request variant generation for a clip
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                n_variants:
+                  type: integer
+                options:
+                  type: object
+                dedup_key:
+                  type: string
+            examples:
+              small_batch:
+                value:
+                  n_variants: 5
+                  options:
+                    subtitles: true
+                  dedup_key: "variants-20251118-01"
+      responses:
+        '202':
+          description: variant request accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+        '400':
+          description: invalid request
+
+  /confirm_publish:
+    post:
+      summary: Manual confirmation that a clip was published on the official account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmPublishRequest'
+            examples:
+              example1:
+                value:
+                  clip_id: "33333333-3333-3333-3333-333333333333"
+                  platform: instagram
+                  post_url: "https://instagram.com/p/XXXXX"
+                  post_id: "1789_XXXXX"
+                  published_at: "2025-11-20T10:00:00Z"
+                  confirmed_by: "11111111-1111-1111-1111-111111111111"
+                  trace_id: "trace-20251118-01"
+      responses:
+        '200':
+          description: publish detected and campaign launch enqueued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  trace_id:
+                    type: string
+              examples:
+                ok:
+                  value:
+                    message: "publish accepted"
+                    trace_id: "trace-20251118-01"
+        '400':
+          description: bad request
+
+  /webhook/instagram:
+    post:
+      summary: Instagram Graph webhook receiver (publication events)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookInstagramPayload'
+            examples:
+              sample:
+                value:
+                  object: page
+                  entry:
+                    - id: "123"
+                      changes:
+                        - field: media
+                          value:
+                            post_id: "1789_XXXXX"
+                            url: "https://instagram.com/p/XXXXX"
+      responses:
+        '200':
+          description: accepted
+        '400':
+          description: invalid signature
+
+  /campaigns:
+    post:
+      summary: Create/preview a campaign
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CampaignCreate'
+            examples:
+              sample:
+                value:
+                  name: "Launch ES Winter"
+                  clip_id: "33333333-3333-3333-3333-333333333333"
+                  budget_cents: 100000
+                  targeting:
+                    countries:
+                      - ES
+                    age_range:
+                      - 18
+                      - 35
+      responses:
+        '201':
+          description: campaign created
+    get:
+      summary: list campaigns
+      responses:
+        '200':
+          description: campaigns
+
+  /rules:
+    get:
+      summary: Get active platform rules
+      responses:
+        '200':
+          description: rules
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformRules'
+    post:
+      summary: Propose rule changes (creates a candidate ruleset requiring approval)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                rules:
+                  type: object
+            examples:
+              sample:
+                value:
+                  name: "increase_retention_threshold"
+                  rules:
+                    min_retention: 0.5
+      responses:
+        '202':
+          description: proposal created (awaiting approval)

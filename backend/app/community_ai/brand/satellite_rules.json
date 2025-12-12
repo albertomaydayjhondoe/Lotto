@@ -1,0 +1,278 @@
+{
+  "version": "1.0.0",
+  "artist_id": "stakazo_001",
+  "artist_name": "Stakazo",
+  "generated_at": "2024-12-07T10:00:00Z",
+  "channel_type": "satellite",
+  "philosophy": {
+    "purpose": "Experimental testing ground for trends, formats, and viral content",
+    "objective": "Collect ML training data and identify winning patterns without brand risk",
+    "relationship_to_official": "Completely separate - NO brand validation required",
+    "key_principles": [
+      "Experimentation over perfection",
+      "Rapid iteration and learning",
+      "Trend testing without brand constraints",
+      "ML data collection focus",
+      "Never show real artist identity"
+    ]
+  },
+  "content_rules": {
+    "allowed_content_types": [
+      "edits_virales",
+      "IA_videos",
+      "clips_series_peliculas",
+      "GTA_edits",
+      "anime_edits",
+      "contenido_experimental",
+      "trends_populares"
+    ],
+    "content_categories": {
+      "viral_edits": {
+        "enabled": true,
+        "description": "Fast-paced edits with trending music",
+        "examples": [
+          "lyric_edits",
+          "beat_sync_edits",
+          "transition_edits"
+        ]
+      },
+      "ai_videos": {
+        "enabled": true,
+        "description": "AI-generated videos and experimental AI content",
+        "examples": [
+          "AI_music_videos",
+          "style_transfer",
+          "deepfake_experiments"
+        ]
+      },
+      "game_clips": {
+        "enabled": true,
+        "description": "GTA, anime, movie/series clips with music overlay",
+        "examples": [
+          "GTA_edits",
+          "anime_AMV",
+          "movie_scene_edits"
+        ]
+      },
+      "trend_testing": {
+        "enabled": true,
+        "description": "Testing popular TikTok/Instagram trends",
+        "examples": [
+          "dance_trends",
+          "audio_trends",
+          "format_trends"
+        ]
+      },
+      "format_experiments": {
+        "enabled": true,
+        "description": "New video formats and editing styles",
+        "examples": [
+          "vertical_video",
+          "split_screen",
+          "text_heavy"
+        ]
+      }
+    },
+    "content_sources": [
+      "AI_generated",
+      "stock_footage",
+      "game_clips",
+      "anime_clips",
+      "movie_clips",
+      "public_domain",
+      "creative_commons"
+    ]
+  },
+  "prohibitions": {
+    "absolute_prohibitions": [
+      "NO_mostrar_artista_real",
+      "NO_mezclar_estetica_oficial",
+      "NO_usar_vestuario_oficial"
+    ],
+    "detailed_rules": {
+      "NO_mostrar_artista_real": {
+        "rule": "Never show real artist face, body, or recognizable features",
+        "reason": "Satellite is separate from artist's real identity",
+        "enforcement": "automatic_rejection",
+        "exceptions": []
+      },
+      "NO_mezclar_estetica_oficial": {
+        "rule": "Never use official brand aesthetic, colors, or visual style",
+        "reason": "Maintain clear separation between official and satellite",
+        "enforcement": "automatic_rejection",
+        "exceptions": []
+      },
+      "NO_usar_vestuario_oficial": {
+        "rule": "Never use artist's official wardrobe, accessories, or fashion",
+        "reason": "Prevent brand identity confusion",
+        "enforcement": "automatic_rejection",
+        "exceptions": []
+      }
+    },
+    "content_restrictions": {
+      "no_brand_validation": "Satellite content does NOT require brand compliance",
+      "no_color_palette_enforcement": "Official color palette does NOT apply",
+      "no_aesthetic_coherence": "Aesthetic coherence with official NOT required",
+      "no_narrative_alignment": "Narrative alignment with brand NOT required"
+    }
+  },
+  "freedoms": {
+    "creative_freedoms": [
+      "SI_experimentar_libremente",
+      "SI_usar_IA",
+      "SI_contenido_edgy"
+    ],
+    "detailed_permissions": {
+      "SI_experimentar_libremente": {
+        "freedom": "Complete creative freedom to experiment",
+        "scope": "Unlimited experimentation with formats, styles, trends",
+        "only_limit": "Must not violate prohibitions (NO_ rules)"
+      },
+      "SI_usar_IA": {
+        "freedom": "Full permission to use AI-generated content",
+        "scope": "AI videos, AI images, AI music, deepfakes, style transfer",
+        "quality": "No minimum quality requirements"
+      },
+      "SI_contenido_edgy": {
+        "freedom": "Permission for edgy, controversial, experimental content",
+        "scope": "Content that wouldn't fit official brand can be tested",
+        "guardrails": "Legal compliance only (no illegal content)"
+      }
+    },
+    "no_validation_required": [
+      "brand_compliance_check",
+      "color_palette_validation",
+      "aesthetic_coherence_check",
+      "narrative_alignment_check",
+      "quality_gate_official"
+    ]
+  },
+  "quality_standards": {
+    "minimum_quality_score": 5,
+    "quality_philosophy": "Good enough to test, not necessarily polished",
+    "acceptance_criteria": {
+      "technical_quality": 5.0,
+      "watchability": 5.0,
+      "no_brand_validation": true,
+      "no_aesthetic_validation": true
+    },
+    "rejection_criteria": [
+      "extremely_low_resolution",
+      "unwatchable_quality",
+      "copyright_violation",
+      "illegal_content"
+    ],
+    "iteration_approach": "Post, measure, learn, iterate rapidly"
+  },
+  "posting_strategy": {
+    "frequency": {
+      "posts_per_week": 15,
+      "posts_per_day": 3,
+      "posting_rhythm": "rapid_iteration"
+    },
+    "timing": {
+      "optimal_times": [
+        "20:00",
+        "21:30",
+        "23:00"
+      ],
+      "flexible_scheduling": true,
+      "test_different_times": true
+    },
+    "volume_philosophy": "High volume for rapid learning and pattern discovery",
+    "platforms": {
+      "primary": [
+        "tiktok",
+        "instagram_reels",
+        "youtube_shorts",
+        "spotify"
+      ],
+      "format_per_platform": {
+        "tiktok": [
+          "short_form",
+          "trends",
+          "edits"
+        ],
+        "instagram_reels": [
+          "viral_edits",
+          "music_edits"
+        ],
+        "youtube_shorts": [
+          "experimental",
+          "ai_content"
+        ]
+      }
+    }
+  },
+  "experimentation_rules": {
+    "experimentation_tolerance": 7,
+    "trend_adoption_speed": 6,
+    "testing_framework": {
+      "approach": "Rapid prototyping and iteration",
+      "cycle": "Post → Measure → Learn → Iterate (24-48h cycles)",
+      "success_metrics": [
+        "engagement_rate",
+        "retention_rate",
+        "virality_score"
+      ]
+    },
+    "trend_testing": {
+      "methodology": "Test trends immediately when detected",
+      "adaptation_required": false,
+      "brand_filter": false,
+      "speed_priority": "Fast execution over perfect alignment"
+    },
+    "format_experiments": [
+      "new_editing_styles",
+      "new_video_formats",
+      "new_music_combinations",
+      "ai_techniques",
+      "viral_formulas"
+    ],
+    "learning_objectives": [
+      "Identify winning patterns",
+      "Discover viral formulas",
+      "Test audience preferences",
+      "Collect ML training data",
+      "Find inspiration for official content"
+    ]
+  },
+  "ml_learning_rules": {
+    "data_collection": {
+      "enabled": true,
+      "purpose": "Train ML models to predict content performance",
+      "metrics_tracked": [
+        "retention_rate",
+        "engagement_rate",
+        "views",
+        "shares",
+        "comments_quality",
+        "follower_growth"
+      ],
+      "storage": "All satellite content metrics stored for ML training"
+    },
+    "learning_pipeline": {
+      "step_1": "Post satellite content with experiments",
+      "step_2": "Measure engagement, retention, virality",
+      "step_3": "Identify patterns in successful content",
+      "step_4": "Validate patterns across multiple posts",
+      "step_5": "Apply learnings to official content strategy"
+    },
+    "pattern_discovery": {
+      "track": [
+        "editing_styles_performance",
+        "music_choice_impact",
+        "thumbnail_effectiveness",
+        "caption_engagement",
+        "posting_time_correlation"
+      ],
+      "threshold_for_pattern": "3+ successful posts with same attribute",
+      "confidence_level": 0.7
+    },
+    "success_transfer": {
+      "from_satellite_to_official": "Proven patterns can inform official strategy",
+      "validation_required": true,
+      "adaptation_needed": "Translate satellite patterns to brand-aligned format"
+    }
+  }
+}

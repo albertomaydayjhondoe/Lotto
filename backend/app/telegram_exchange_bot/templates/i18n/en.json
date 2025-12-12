@@ -1,0 +1,78 @@
+{
+  "announcement_variants": [
+    "🔥 LIKE 4 LIKE ❤️  SUB 4 SUB 🔔  COMMENT 4 COMMENT 💬\n👉 {link}\n📩 DM me for exchange 🤝",
+    "🎵 Mutual support here! Guaranteed exchange 🚀\n🎬 My channel: {link}\n✅ Reply or message me privately",
+    "🚀 ACTIVE EXCHANGE - 100% Real\n✅ Like + Comment + Sub\n🎯 Video: {link}\n💪 DM open for mutual support",
+    "💥 MUTUAL SUPPORT? I'm here 🤝\n🔊 Listen to my music: {link}\n📬 Message me and let's coordinate",
+    "🎶 Like 4 Like / Sub 4 Sub / Comment 4 Comment\n🎥 {link}\n🤙 Let's talk privately and do real exchange"
+  ],
+  
+  "dm_intro_variants": [
+    "Hey! Saw your message in {group_name} 🔥\nHere's my video 👉 {link}\nSupport with like + comment + sub? I'll do the same right away 🤝",
+    "Hi! From {group_name} group 💪\nMy channel: {link}\nLike 4 like + sub 4 sub exchange. You in? Fast response",
+    "What's up! Saw you're looking for support in {group_name}\nHere's my video: {link}\nWanna exchange? Like + comment + sub for the same 🎵",
+    "Hey! Saw your post in {group_name}\nExchange support? My video: {link}\nI can support you first if you want 🔥",
+    "Hi! You're in {group_name} looking for support?\nCheck my music: {link}\nWanna do like 4 like + sub 4 sub? 100% real 🤝"
+  ],
+  
+  "dm_followup": [
+    "Sent it above 👆 {link}\nWhen you do like + comment on my video, give me your link and I'll do yours right away 💪",
+    "Cool! Once you do like + comment + sub, let me know and I'll do yours immediately 🔥",
+    "Link is above 👆\nWhen you're done, send me your video/post and I'll support it now ✅",
+    "Ready! When you do your part give me your link, I have it ready to support 🚀"
+  ],
+  
+  "dm_request_link": [
+    "Perfect! Give me your link and I'll do it now 🔥",
+    "Cool! Send me your video/channel and I'll support it right away 💪",
+    "Great! Send me your content link and done ✅",
+    "Awesome! Send me your link, I'm ready to support 🚀"
+  ],
+  
+  "dm_confirmation": [
+    "Noted! I'll do it in the next 5 minutes. Want more support? I have 3 more accounts 😎",
+    "Perfect! Already scheduled. If you need more support I have extra accounts available 🔥",
+    "Done! Doing it now. By the way, interested in support from more accounts? I can help more 💪"
+  ],
+  
+  "dm_thanks": [
+    "🔥 Done! Already supported your content. Thanks for the exchange 🙏🎵",
+    "✅ Done! Like + comment + sub completed. Success with your channel 🚀",
+    "💪 All set! Everything done. Thanks for the mutual support, let's stay in touch 🤝",
+    "🎵 Finished! Supported all your content. Message me anytime for more exchanges 🔥"
+  ],
+  
+  "dm_offer_extra": [
+    "If you want more support I have 3 more accounts available 😎 Interested?",
+    "I have extra accounts if you need more likes/subs. Want massive support? 💥",
+    "By the way, I manage several accounts. Want me to support you from all? 🚀"
+  ],
+  
+  "dm_rejection_polite": [
+    "No worries! If you change your mind, I'm here 🤝",
+    "No problem! If you want later, just let me know 💪",
+    "Cool, no issue! Good luck with your channel 🎵"
+  ],
+  
+  "defense_role": [
+    "I'm a Stakas fan for a while, just looking for mutual support to grow together 🤝",
+    "Nothing weird, just exchange like everyone here. I'm a musician too 🎵",
+    "Chill, I just want to grow my channel like you. Just mutual support 💪"
+  ],
+  
+  "keywords_exchange": [
+    "like for like",
+    "like 4 like",
+    "l4l",
+    "sub for sub",
+    "sub 4 sub",
+    "s4s",
+    "mutual support",
+    "exchange",
+    "music promotion",
+    "help each other",
+    "grow together",
+    "collaboration",
+    "subscribe for subscribe"
+  ]
+}

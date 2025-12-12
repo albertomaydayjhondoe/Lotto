@@ -1,0 +1,36 @@
+{
+  "username": "creator2",
+  "platform": "instagram",
+  "profile_url": "https://www.instagram.com/creator2",
+  "metrics": {
+    "followers": 85000,
+    "avg_views": 32000,
+    "avg_likes": 3200,
+    "avg_comments": 95,
+    "avg_shares": 96.0,
+    "total_posts": 312,
+    "posting_frequency": "high",
+    "engagement_rate": 0.038764705882352944,
+    "view_to_follower_ratio": 0.3764705882352941
+  },
+  "narrative_topics": [
+    "fashion",
+    "travel",
+    "photography"
+  ],
+  "video_styles": [
+    "aesthetic",
+    "cinematic",
+    "carousel"
+  ],
+  "language": "es",
+  "verified": true,
+  "bio": "Photographer \ud83d\udcf8 | Storyteller",
+  "last_post_date": "2025-12-11T18:02:14.878926",
+  "cultural_markers": [
+    "latam",
+    "millennial",
+    "creative"
+  ],
+  "scraped_at": "2025-12-12T18:02:14.878932"
+}

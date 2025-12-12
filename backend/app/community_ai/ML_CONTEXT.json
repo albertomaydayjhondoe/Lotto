@@ -1,0 +1,273 @@
+{
+  "version": "1.0.0",
+  "description": "ML Engine context and objectives for Community Manager AI integration",
+  
+  "ml_objectives": {
+    "optimize": [
+      "retention_rate",
+      "rewatch_probability",
+      "click_through_rate",
+      "viewer_matching",
+      "trend_alignment",
+      "engagement_rate",
+      "follower_conversion",
+      "share_rate",
+      "comment_quality"
+    ],
+    "learn_from": [
+      "satellite_experiments",
+      "a_b_tests",
+      "trend_performance",
+      "timing_optimization",
+      "format_effectiveness"
+    ]
+  },
+
+  "inputs_required": [
+    "vision_metadata",
+    "sentiment_scores",
+    "trend_vectors",
+    "brand_rules",
+    "posting_history",
+    "performance_metrics",
+    "audience_demographics",
+    "platform_specific_data"
+  ],
+
+  "vision_metadata_schema": {
+    "objects_detected": ["object_name", "confidence"],
+    "scene_classification": "string",
+    "color_palette": ["#HEX", "#HEX"],
+    "aesthetic_dna": {
+      "dominant_colors": [],
+      "secondary_colors": [],
+      "mood": "string",
+      "style": "string"
+    },
+    "clip_embeddings": "vector[512]"
+  },
+
+  "sentiment_scores_schema": {
+    "overall_sentiment": "float [-1.0, 1.0]",
+    "positive_ratio": "float [0.0, 1.0]",
+    "negative_ratio": "float [0.0, 1.0]",
+    "neutral_ratio": "float [0.0, 1.0]",
+    "topics_extracted": ["topic1", "topic2"],
+    "hype_signals": ["signal1", "signal2"],
+    "confidence": "float [0.0, 1.0]"
+  },
+
+  "trend_vectors_schema": {
+    "trend_id": "string",
+    "category": "visual|audio|narrative|format",
+    "growth_rate": "float",
+    "brand_fit": "float [0.0, 1.0]",
+    "platform": "tiktok|instagram|youtube",
+    "features": {
+      "rhythm": "fast|medium|slow",
+      "visual_dominance": "string",
+      "storytelling_style": "string"
+    }
+  },
+
+  "outputs": [
+    "posting_recommendations",
+    "content_suggestions",
+    "style_guidance",
+    "trend_forecasts",
+    "timing_optimization",
+    "audience_targeting",
+    "format_recommendations"
+  ],
+
+  "posting_recommendations_schema": {
+    "recommended_time": "HH:MM",
+    "recommended_platform": "string",
+    "confidence": "float [0.0, 1.0]",
+    "reasoning": "string",
+    "expected_performance": {
+      "views_estimate": "int",
+      "engagement_estimate": "float"
+    }
+  },
+
+  "content_suggestions_schema": {
+    "suggestion_id": "string",
+    "theme": "string",
+    "format": "reel|story|post|short",
+    "narrative_structure": "string",
+    "aesthetic_guidance": {
+      "colors": [],
+      "mood": "string",
+      "camera_style": "string"
+    },
+    "trend_alignment": "float [0.0, 1.0]",
+    "brand_fit": "float [0.0, 1.0]",
+    "predicted_performance": "float [0.0, 1.0]"
+  },
+
+  "learning_pipeline": {
+    "step_1": "Collect satellite performance data",
+    "step_2": "Extract successful patterns",
+    "step_3": "Validate patterns against brand rules",
+    "step_4": "Test patterns in controlled satellite experiments",
+    "step_5": "Apply successful patterns to official channel",
+    "step_6": "Measure performance delta",
+    "step_7": "Refine model with feedback loop"
+  },
+
+  "training_data_sources": {
+    "satellite_channels": {
+      "description": "Experimental content with rapid iteration",
+      "data_points": [
+        "format_type",
+        "editing_style",
+        "posting_time",
+        "hashtags_used",
+        "caption_style",
+        "visual_aesthetic",
+        "performance_metrics"
+      ]
+    },
+    "official_channel": {
+      "description": "High-quality brand-aligned content",
+      "data_points": [
+        "narrative_structure",
+        "aesthetic_coherence",
+        "audience_sentiment",
+        "long_term_retention",
+        "brand_perception_impact"
+      ]
+    },
+    "trend_analysis": {
+      "description": "Multi-platform trend tracking",
+      "data_points": [
+        "trend_lifecycle",
+        "platform_specific_performance",
+        "brand_fit_correlation",
+        "audience_overlap"
+      ]
+    }
+  },
+
+  "model_types": {
+    "retention_predictor": {
+      "type": "regression",
+      "input": ["vision_metadata", "sentiment_scores", "posting_time"],
+      "output": "retention_rate [0.0, 1.0]"
+    },
+    "virality_classifier": {
+      "type": "classification",
+      "input": ["trend_vectors", "engagement_velocity", "share_patterns"],
+      "output": "virality_score [0.0, 1.0]"
+    },
+    "timing_optimizer": {
+      "type": "time_series",
+      "input": ["historical_performance", "platform", "content_type"],
+      "output": "optimal_posting_time HH:MM"
+    },
+    "content_recommender": {
+      "type": "collaborative_filtering",
+      "input": ["audience_preferences", "brand_dna", "trend_data"],
+      "output": "content_suggestions []"
+    }
+  },
+
+  "feedback_loop": {
+    "frequency": "daily",
+    "metrics_tracked": [
+      "prediction_accuracy",
+      "recommendation_acceptance_rate",
+      "actual_vs_predicted_performance",
+      "brand_compliance_score",
+      "user_satisfaction"
+    ],
+    "improvement_cycle": {
+      "collect": "Gather new performance data",
+      "analyze": "Identify prediction gaps",
+      "retrain": "Update model with new data",
+      "validate": "Test on holdout set",
+      "deploy": "Push improved model to production"
+    }
+  },
+
+  "performance_tracking": {
+    "kpis": [
+      {
+        "name": "Model Accuracy",
+        "target": 0.85,
+        "current": 0.0,
+        "unit": "correlation_coefficient"
+      },
+      {
+        "name": "Recommendation Acceptance",
+        "target": 0.70,
+        "current": 0.0,
+        "unit": "percentage"
+      },
+      {
+        "name": "Performance Improvement",
+        "target": 0.15,
+        "current": 0.0,
+        "unit": "percentage_lift"
+      },
+      {
+        "name": "Prediction Latency",
+        "target": 500,
+        "current": 0,
+        "unit": "milliseconds"
+      }
+    ]
+  },
+
+  "data_pipeline": {
+    "ingestion": {
+      "source": "community_ai + satellite_engine + vision_engine",
+      "frequency": "real_time",
+      "validation": "schema_check + outlier_detection"
+    },
+    "preprocessing": {
+      "steps": [
+        "normalize_metrics",
+        "encode_categorical_features",
+        "generate_embeddings",
+        "extract_temporal_features"
+      ]
+    },
+    "feature_engineering": {
+      "derived_features": [
+        "engagement_velocity",
+        "trend_decay_rate",
+        "audience_affinity_score",
+        "aesthetic_similarity_index",
+        "narrative_complexity_score"
+      ]
+    },
+    "storage": {
+      "raw_data": "postgresql_timeseries",
+      "processed_features": "redis_cache",
+      "model_artifacts": "s3_bucket",
+      "predictions": "postgresql_predictions_table"
+    }
+  },
+
+  "experimentation_framework": {
+    "a_b_testing": {
+      "enabled": true,
+      "test_duration_days": 7,
+      "min_sample_size": 100,
+      "significance_level": 0.05
+    },
+    "multi_armed_bandit": {
+      "enabled": true,
+      "exploration_rate": 0.2,
+      "algorithm": "thompson_sampling"
+    }
+  },
+
+  "notes": {
+    "integration_status": "Pending ML Engine implementation (Future Sprint)",
+    "current_usage": "CM logs data for future ML training",
+    "expected_timeline": "Sprint 5-6 for full ML integration"
+  }
+}

@@ -1,0 +1,676 @@
+{
+  "version": "1.0.0",
+  "questionnaire_sections": [
+    {
+      "section_id": "visual_identity",
+      "section_name": "Identidad Visual",
+      "priority": "critical",
+      "questions": [
+        {
+          "id": "q1_color_palette",
+          "question": "¿Cuáles son los 3-5 colores principales que representan tu marca?",
+          "type": "color_list",
+          "required": true,
+          "examples": ["#8B44FF (purple)", "#0A0A0A (black)", "#1A1A2E (dark blue)"]
+        },
+        {
+          "id": "q2_forbidden_colors",
+          "question": "¿Qué colores NUNCA deben aparecer en tu contenido oficial?",
+          "type": "color_list",
+          "required": true,
+          "examples": ["pasteles", "amarillo brillante", "rosa claro"]
+        },
+        {
+          "id": "q3_visual_style",
+          "question": "Define tu estética visual en 3-5 palabras",
+          "type": "keywords",
+          "required": true,
+          "examples": ["oscuro", "futurista", "cyberpunk", "neon", "urbano"]
+        },
+        {
+          "id": "q4_camera_style",
+          "question": "¿Qué estilos de cámara prefieres?",
+          "type": "multi_select",
+          "required": true,
+          "options": [
+            "tracking_shots",
+            "static_shots",
+            "slow_motion",
+            "handheld",
+            "drone",
+            "close_ups",
+            "wide_shots",
+            "dutch_angles",
+            "POV"
+          ]
+        },
+        {
+          "id": "q5_lighting_preference",
+          "question": "¿Qué tipo de iluminación representa tu marca?",
+          "type": "multi_select",
+          "required": true,
+          "options": [
+            "high_contrast",
+            "low_key",
+            "neon_lights",
+            "natural_light",
+            "studio_lighting",
+            "street_lights",
+            "darkness_with_accents"
+          ]
+        },
+        {
+          "id": "q6_scene_preference",
+          "question": "¿Qué escenarios son coherentes con tu marca?",
+          "type": "multi_select",
+          "required": true,
+          "options": [
+            "ciudad_noche",
+            "estudios_oscuros",
+            "calles_urbanas",
+            "azoteas",
+            "interiores_industriales",
+            "coches",
+            "espacios_minimalistas",
+            "arquitectura_moderna"
+          ]
+        },
+        {
+          "id": "q7_forbidden_scenes",
+          "question": "¿Qué escenarios NUNCA deben aparecer?",
+          "type": "multi_select",
+          "required": true,
+          "options": [
+            "playa",
+            "bosque",
+            "dia_soleado",
+            "ambientes_naturales",
+            "espacios_rusticos",
+            "lugares_genericos"
+          ]
+        },
+        {
+          "id": "q8_editing_style",
+          "question": "¿Qué estilos de edición te representan?",
+          "type": "multi_select",
+          "required": true,
+          "options": [
+            "fast_cuts_on_beat",
+            "smooth_transitions",
+            "glitch_effects",
+            "color_grading_cinematic",
+            "slow_motion_sequences",
+            "time_remapping",
+            "visual_effects"
+          ]
+        },
+        {
+          "id": "q9_forbidden_edits",
+          "question": "¿Qué estilos de edición NUNCA usar?",
+          "type": "multi_select",
+          "required": true,
+          "options": [
+            "edits_genericos",
+            "transiciones_basicas",
+            "efectos_baratos",
+            "lyric_videos_simples",
+            "slideshows",
+            "exceso_de_texto"
+          ]
+        },
+        {
+          "id": "q10_visual_references",
+          "question": "Top 5 referencias visuales que inspiran tu estética",
+          "type": "text_list",
+          "required": true,
+          "examples": ["Travis Scott - SICKO MODE", "Blade Runner 2049", "Cyberpunk 2077"]
+        }
+      ]
+    },
+    {
+      "section_id": "brand_tone",
+      "section_name": "Tono y Personalidad",
+      "priority": "critical",
+      "questions": [
+        {
+          "id": "q11_emotional_tone",
+          "question": "¿Qué emociones quieres transmitir?",
+          "type": "multi_select",
+          "required": true,
+          "options": [
+            "intensidad",
+            "misterio",
+            "poder",
+            "aspiracion",
+            "rebeldia",
+            "melancolia",
+            "energia",
+            "oscuridad",
+            "ambicion"
+          ]
+        },
+        {
+          "id": "q12_forbidden_emotions",
+          "question": "¿Qué emociones NUNCA transmitir?",
+          "type": "multi_select",
+          "required": true,
+          "options": [
+            "alegria_superficial",
+            "debilidad",
+            "confusion",
+            "contenido_generico",
+            "positividad_forzada",
+            "humor_ligero"
+          ]
+        },
+        {
+          "id": "q13_brand_personality",
+          "question": "Define tu personalidad de marca en 5 palabras",
+          "type": "keywords",
+          "required": true,
+          "examples": ["auténtico", "introspectivo", "visionario", "implacable", "misterioso"]
+        },
+        {
+          "id": "q14_artist_uniqueness",
+          "question": "¿Qué te hace único vs otros artistas?",
+          "type": "text",
+          "required": true,
+          "max_words": 200
+        },
+        {
+          "id": "q15_artist_inspirations",
+          "question": "¿Qué 5-10 artistas inspiran tu sonido/estética?",
+          "type": "text_list",
+          "required": true,
+          "examples": ["Travis Scott", "The Weeknd", "Frank Ocean"]
+        }
+      ]
+    },
+    {
+      "section_id": "music_context",
+      "section_name": "Contexto Musical",
+      "priority": "high",
+      "questions": [
+        {
+          "id": "q16_genres",
+          "question": "¿Qué géneros defines tu música?",
+          "type": "multi_select",
+          "required": true,
+          "options": [
+            "trap",
+            "drill",
+            "electronic",
+            "hip_hop",
+            "experimental",
+            "r&b",
+            "alternative",
+            "ambient"
+          ]
+        },
+        {
+          "id": "q17_moods",
+          "question": "¿Qué moods predominan en tu música?",
+          "type": "multi_select",
+          "required": true,
+          "options": [
+            "energetic",
+            "dark",
+            "melancholic",
+            "aggressive",
+            "introspective",
+            "hypnotic",
+            "atmospheric",
+            "intense"
+          ]
+        },
+        {
+          "id": "q18_vocal_style",
+          "question": "Describe tu estilo vocal",
+          "type": "multi_select",
+          "required": true,
+          "options": [
+            "autotuned",
+            "melodic",
+            "aggressive",
+            "soft",
+            "layered",
+            "minimal",
+            "experimental"
+          ]
+        },
+        {
+          "id": "q19_lyrical_themes",
+          "question": "¿Qué temas líricos abordas?",
+          "type": "multi_select",
+          "required": true,
+          "options": [
+            "lucha_personal",
+            "ambicion",
+            "relaciones",
+            "ciudad_noche",
+            "soledad",
+            "ascenso",
+            "reflexion",
+            "transformacion"
+          ]
+        },
+        {
+          "id": "q20_forbidden_themes",
+          "question": "¿Qué temas líricos NUNCA tocar?",
+          "type": "multi_select",
+          "required": true,
+          "options": [
+            "romance_superficial",
+            "contenido_motivacional_cliche",
+            "temas_genericos",
+            "politica_explicita"
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "fashion_identity",
+      "section_name": "Identidad de Moda",
+      "priority": "high",
+      "questions": [
+        {
+          "id": "q21_wardrobe_style",
+          "question": "¿Qué estilo de vestuario te representa?",
+          "type": "multi_select",
+          "required": true,
+          "options": [
+            "hoodies_oscuros",
+            "leather_jackets",
+            "streetwear_premium",
+            "tech_wear",
+            "minimalist_black",
+            "futuristic_accessories",
+            "masks_goggles"
+          ]
+        },
+        {
+          "id": "q22_forbidden_fashion",
+          "question": "¿Qué vestuario NUNCA usar?",
+          "type": "multi_select",
+          "required": true,
+          "options": [
+            "ropa_colorida",
+            "deportiva_generica",
+            "formal_tradicional",
+            "estilo_casual_basico",
+            "prints_llamativos"
+          ]
+        },
+        {
+          "id": "q23_accessories",
+          "question": "¿Qué accesorios son clave en tu imagen?",
+          "type": "text_list",
+          "required": true,
+          "examples": ["máscaras LED", "gafas futuristas", "joyas mínimas", "tech accessories"]
+        },
+        {
+          "id": "q24_fashion_aesthetic",
+          "question": "Define tu estética de moda en 3 palabras",
+          "type": "keywords",
+          "required": true,
+          "examples": ["streetwear", "cyberpunk", "minimalista"]
+        }
+      ]
+    },
+    {
+      "section_id": "narrative_storytelling",
+      "section_name": "Narrativa y Storytelling",
+      "priority": "high",
+      "questions": [
+        {
+          "id": "q25_story_types",
+          "question": "¿Qué tipo de historias quieres contar?",
+          "type": "multi_select",
+          "required": true,
+          "options": [
+            "rise_from_underground",
+            "personal_struggle",
+            "transformation",
+            "urban_solitude",
+            "ambition_journey",
+            "artistic_vision",
+            "night_city_tales"
+          ]
+        },
+        {
+          "id": "q26_repeatable_themes",
+          "question": "¿Qué temas narrativos deben repetirse?",
+          "type": "text_list",
+          "required": true,
+          "examples": ["noche", "ciudad", "ascenso", "transformación"]
+        },
+        {
+          "id": "q27_avoided_narratives",
+          "question": "¿Qué narrativas evitar?",
+          "type": "multi_select",
+          "required": true,
+          "options": [
+            "historias_genericas",
+            "romance_obvio",
+            "motivacion_cliche",
+            "contenido_corporativo",
+            "narrativas_superficiales"
+          ]
+        },
+        {
+          "id": "q28_storytelling_style",
+          "question": "¿Cómo prefieres contar historias visualmente?",
+          "type": "multi_select",
+          "required": true,
+          "options": [
+            "cinematico",
+            "abstracto",
+            "directo",
+            "simbolico",
+            "minimalista",
+            "complejo_layers"
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "official_vs_satellite",
+      "section_name": "Oficial vs Satélite",
+      "priority": "critical",
+      "questions": [
+        {
+          "id": "q29_official_content_types",
+          "question": "¿Qué tipo de contenido SÍ va en cuenta oficial?",
+          "type": "multi_select",
+          "required": true,
+          "options": [
+            "videoclips_oficiales",
+            "teasers_cinematicos",
+            "behind_scenes_premium",
+            "anuncios_lanzamientos",
+            "reels_alta_produccion",
+            "contenido_narrativo",
+            "colaboraciones"
+          ]
+        },
+        {
+          "id": "q30_official_forbidden",
+          "question": "¿Qué NUNCA debe aparecer en cuenta oficial?",
+          "type": "multi_select",
+          "required": true,
+          "options": [
+            "contenido_viral_generico",
+            "trends_sin_coherencia",
+            "edits_rapidos_lowquality",
+            "memes_casuales",
+            "contenido_experimental_sin_pulir"
+          ]
+        },
+        {
+          "id": "q31_satellite_content_types",
+          "question": "¿Qué tipo de contenido va en satélites?",
+          "type": "multi_select",
+          "required": true,
+          "options": [
+            "edits_virales",
+            "IA_videos",
+            "clips_series_peliculas",
+            "GTA_edits",
+            "anime_edits",
+            "contenido_experimental",
+            "trends_populares",
+            "formato_testing"
+          ]
+        },
+        {
+          "id": "q32_satellite_rules",
+          "question": "Reglas para contenido satélite",
+          "type": "multi_select",
+          "required": true,
+          "options": [
+            "NO_mostrar_artista_real",
+            "NO_mezclar_estetica_oficial",
+            "NO_usar_vestuario_oficial",
+            "SI_experimentar_libremente",
+            "SI_usar_IA",
+            "SI_contenido_edgy"
+          ]
+        },
+        {
+          "id": "q33_quality_threshold_official",
+          "question": "Nivel de calidad mínimo para oficial (1-10)",
+          "type": "scale",
+          "required": true,
+          "min": 1,
+          "max": 10,
+          "default": 8
+        },
+        {
+          "id": "q34_quality_threshold_satellite",
+          "question": "Nivel de calidad mínimo para satélite (1-10)",
+          "type": "scale",
+          "required": true,
+          "min": 1,
+          "max": 10,
+          "default": 5
+        }
+      ]
+    },
+    {
+      "section_id": "audience_targeting",
+      "section_name": "Audiencia y Targeting",
+      "priority": "high",
+      "questions": [
+        {
+          "id": "q35_target_audience_age",
+          "question": "Rango de edad de tu audiencia principal",
+          "type": "range",
+          "required": true,
+          "min": 13,
+          "max": 50,
+          "default": [16, 28]
+        },
+        {
+          "id": "q36_audience_characteristics",
+          "question": "¿Cómo describes a tu audiencia ideal?",
+          "type": "multi_select",
+          "required": true,
+          "options": [
+            "urbanos",
+            "fans_trap_electronic",
+            "gamers",
+            "tech_savvy",
+            "creativos",
+            "nocturnos",
+            "buscadores_identidad",
+            "anti_mainstream"
+          ]
+        },
+        {
+          "id": "q37_engagement_drivers",
+          "question": "¿Qué engancha más a tu audiencia?",
+          "type": "multi_select",
+          "required": true,
+          "options": [
+            "estetica_unica",
+            "cinematografia_calidad",
+            "drops_inesperados",
+            "narrative_hooks",
+            "autenticidad",
+            "innovacion_visual"
+          ]
+        },
+        {
+          "id": "q38_content_consumption",
+          "question": "¿Dónde consume más contenido tu audiencia?",
+          "type": "multi_select",
+          "required": true,
+          "options": [
+            "tiktok",
+            "instagram_reels",
+            "youtube_shorts",
+            "spotify",
+            "soundcloud"
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "content_strategy",
+      "section_name": "Estrategia de Contenido",
+      "priority": "high",
+      "questions": [
+        {
+          "id": "q39_posting_frequency_official",
+          "question": "¿Cuántos posts por semana en cuenta oficial?",
+          "type": "number",
+          "required": true,
+          "min": 1,
+          "max": 14,
+          "default": 5
+        },
+        {
+          "id": "q40_posting_frequency_satellite",
+          "question": "¿Cuántos posts por semana en satélites?",
+          "type": "number",
+          "required": true,
+          "min": 3,
+          "max": 30,
+          "default": 15
+        },
+        {
+          "id": "q41_optimal_posting_times",
+          "question": "¿Cuáles son tus mejores horarios para publicar?",
+          "type": "time_list",
+          "required": false,
+          "examples": ["20:00", "21:30", "23:00"]
+        },
+        {
+          "id": "q42_content_mix",
+          "question": "Mix ideal de contenido oficial",
+          "type": "percentage_allocation",
+          "required": true,
+          "categories": [
+            "videoclips_oficiales",
+            "teasers_previews",
+            "behind_scenes",
+            "reels_narrativos",
+            "stories_aesthetic"
+          ]
+        },
+        {
+          "id": "q43_experimentation_tolerance",
+          "question": "¿Qué tan abierto estás a experimentar? (1-10)",
+          "type": "scale",
+          "required": true,
+          "min": 1,
+          "max": 10,
+          "default": 7
+        },
+        {
+          "id": "q44_trend_adoption_speed",
+          "question": "¿Qué tan rápido adoptar trends? (1-10)",
+          "type": "scale",
+          "required": true,
+          "min": 1,
+          "max": 10,
+          "default": 6
+        }
+      ]
+    },
+    {
+      "section_id": "platform_guidelines",
+      "section_name": "Guidelines por Plataforma",
+      "priority": "medium",
+      "questions": [
+        {
+          "id": "q45_instagram_strategy",
+          "question": "Estrategia principal en Instagram",
+          "type": "multi_select",
+          "required": true,
+          "options": [
+            "reels_cinematicos",
+            "posts_aesthetic",
+            "stories_diarias",
+            "igtv_longform",
+            "carruseles_narrativos"
+          ]
+        },
+        {
+          "id": "q46_tiktok_strategy",
+          "question": "Estrategia principal en TikTok",
+          "type": "multi_select",
+          "required": true,
+          "options": [
+            "trends_adaptados",
+            "contenido_original",
+            "behind_scenes",
+            "challenges",
+            "duets_collaborations"
+          ]
+        },
+        {
+          "id": "q47_youtube_strategy",
+          "question": "Estrategia principal en YouTube",
+          "type": "multi_select",
+          "required": true,
+          "options": [
+            "videoclips_oficiales",
+            "shorts_virales",
+            "vlogs_artisticos",
+            "making_of",
+            "live_sessions"
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "metrics_priorities",
+      "section_name": "Prioridades de Métricas",
+      "priority": "medium",
+      "questions": [
+        {
+          "id": "q48_primary_kpis",
+          "question": "¿Qué KPIs priorizas?",
+          "type": "ranked_list",
+          "required": true,
+          "options": [
+            "views",
+            "retention_rate",
+            "engagement_rate",
+            "shares",
+            "comments_quality",
+            "follower_growth",
+            "click_through_rate",
+            "saves"
+          ]
+        },
+        {
+          "id": "q49_success_definition",
+          "question": "¿Cómo defines el éxito de un post?",
+          "type": "text",
+          "required": true,
+          "max_words": 150
+        },
+        {
+          "id": "q50_failure_tolerance",
+          "question": "¿Cuántos posts de bajo rendimiento toleras antes de ajustar estrategia?",
+          "type": "number",
+          "required": true,
+          "min": 1,
+          "max": 10,
+          "default": 3
+        }
+      ]
+    }
+  ],
+  "total_questions": 50,
+  "estimated_completion_time_minutes": 45,
+  "requires_followup": true,
+  "generates_files": [
+    "onboarding_answers.json",
+    "brand_static_rules.json",
+    "satellite_rules.json",
+    "content_strategy.json"
+  ]
+}

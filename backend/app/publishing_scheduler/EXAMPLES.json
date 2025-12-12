@@ -1,0 +1,352 @@
+{
+  "description": "Real-world examples of Publishing Scheduler in action",
+  "examples": [
+    {
+      "scenario": "1. Schedule Instagram post during optimal window",
+      "request": {
+        "method": "POST",
+        "endpoint": "/publishing/schedule",
+        "body": {
+          "clip_id": "clip_abc123",
+          "platform": "instagram",
+          "social_account_id": "acc_instagram_456",
+          "scheduled_for": "2024-11-21T20:00:00Z",
+          "scheduled_by": "manual"
+        }
+      },
+      "response": {
+        "publish_log_id": "log_789xyz",
+        "status": "scheduled",
+        "reason": null,
+        "scheduled_for": "2024-11-21T20:00:00Z",
+        "scheduled_window_end": null
+      },
+      "database_state": {
+        "publish_log": {
+          "id": "log_789xyz",
+          "clip_id": "clip_abc123",
+          "platform": "instagram",
+          "social_account_id": "acc_instagram_456",
+          "status": "scheduled",
+          "schedule_type": "scheduled",
+          "scheduled_for": "2024-11-21T20:00:00Z",
+          "scheduled_by": "manual",
+          "created_at": "2024-11-21T14:30:00Z",
+          "updated_at": "2024-11-21T14:30:00Z"
+        }
+      },
+      "ledger_events": [
+        {
+          "event_type": "publish_scheduled_created",
+          "entity_type": "publish_log",
+          "entity_id": "log_789xyz",
+          "severity": "info",
+          "message": "Publication scheduled for 2024-11-21T20:00:00Z"
+        }
+      ]
+    },
+    {
+      "scenario": "2. Schedule outside window - auto-adjusted forward",
+      "request": {
+        "method": "POST",
+        "endpoint": "/publishing/schedule",
+        "body": {
+          "clip_id": "clip_def456",
+          "platform": "instagram",
+          "social_account_id": "acc_instagram_789",
+          "scheduled_for": "2024-11-21T14:00:00Z",
+          "scheduled_by": "rule_engine"
+        }
+      },
+      "response": {
+        "publish_log_id": "log_adjusted_1",
+        "status": "scheduled",
+        "reason": "Adjusted from 2024-11-21T14:00:00Z to 2024-11-21T18:00:00Z (outside platform window 18:00-23:00)",
+        "scheduled_for": "2024-11-21T18:00:00Z",
+        "scheduled_window_end": null
+      },
+      "database_state": {
+        "publish_log": {
+          "id": "log_adjusted_1",
+          "clip_id": "clip_def456",
+          "platform": "instagram",
+          "status": "scheduled",
+          "schedule_type": "scheduled",
+          "scheduled_for": "2024-11-21T18:00:00Z",
+          "scheduled_by": "rule_engine"
+        }
+      },
+      "ledger_events": [
+        {
+          "event_type": "publish_scheduled_created",
+          "entity_type": "publish_log",
+          "entity_id": "log_adjusted_1",
+          "severity": "info",
+          "message": "Publication scheduled for 2024-11-21T18:00:00Z"
+        },
+        {
+          "event_type": "publish_scheduled_adjusted",
+          "entity_type": "publish_log",
+          "entity_id": "log_adjusted_1",
+          "severity": "warn",
+          "message": "Adjusted from 2024-11-21T14:00:00Z to 2024-11-21T18:00:00Z (outside platform window 18:00-23:00)"
+        }
+      ]
+    },
+    {
+      "scenario": "3. Schedule with gap enforcement - pushed forward 5 minutes",
+      "context": "Already scheduled post at 20:00, new post requested at 20:30 (violates 60min gap)",
+      "existing_logs": [
+        {
+          "id": "log_existing_1",
+          "clip_id": "clip_other",
+          "platform": "instagram",
+          "social_account_id": "acc_instagram_789",
+          "scheduled_for": "2024-11-21T20:00:00Z",
+          "status": "scheduled"
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "endpoint": "/publishing/schedule",
+        "body": {
+          "clip_id": "clip_ghi789",
+          "platform": "instagram",
+          "social_account_id": "acc_instagram_789",
+          "scheduled_for": "2024-11-21T20:30:00Z",
+          "scheduled_by": "manual"
+        }
+      },
+      "response": {
+        "publish_log_id": "log_gap_adjusted",
+        "status": "scheduled",
+        "reason": "Adjusted from 2024-11-21T20:30:00Z to 2024-11-21T21:00:00Z (60min gap enforcement)",
+        "scheduled_for": "2024-11-21T21:00:00Z",
+        "scheduled_window_end": null
+      },
+      "ledger_events": [
+        {
+          "event_type": "publish_scheduled_created",
+          "entity_type": "publish_log",
+          "entity_id": "log_gap_adjusted",
+          "severity": "info",
+          "message": "Publication scheduled for 2024-11-21T21:00:00Z"
+        },
+        {
+          "event_type": "publish_scheduled_adjusted",
+          "entity_type": "publish_log",
+          "entity_id": "log_gap_adjusted",
+          "severity": "warn",
+          "message": "Adjusted from 2024-11-21T20:30:00Z to 2024-11-21T21:00:00Z (60min gap enforcement)"
+        }
+      ]
+    },
+    {
+      "scenario": "4. Scheduler tick - move scheduled logs to pending",
+      "context": "Cron job calls /publishing/scheduler/tick every minute",
+      "database_before": [
+        {
+          "id": "log_due_1",
+          "clip_id": "clip_ready_1",
+          "platform": "tiktok",
+          "status": "scheduled",
+          "scheduled_for": "2024-11-21T16:00:00Z"
+        },
+        {
+          "id": "log_due_2",
+          "clip_id": "clip_ready_2",
+          "platform": "instagram",
+          "status": "scheduled",
+          "scheduled_for": "2024-11-21T16:05:00Z"
+        },
+        {
+          "id": "log_future",
+          "clip_id": "clip_later",
+          "platform": "youtube",
+          "status": "scheduled",
+          "scheduled_for": "2024-11-21T20:00:00Z"
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "endpoint": "/publishing/scheduler/tick?dry_run=false",
+        "body": {},
+        "current_time": "2024-11-21T16:10:00Z"
+      },
+      "response": {
+        "moved": 2,
+        "dry_run": false,
+        "log_ids": ["log_due_1", "log_due_2"]
+      },
+      "database_after": [
+        {
+          "id": "log_due_1",
+          "status": "pending",
+          "comment": "Changed by scheduler_tick"
+        },
+        {
+          "id": "log_due_2",
+          "status": "pending",
+          "comment": "Changed by scheduler_tick"
+        },
+        {
+          "id": "log_future",
+          "status": "scheduled",
+          "comment": "Not yet due, remains scheduled"
+        }
+      ],
+      "ledger_events": [
+        {
+          "event_type": "publish_scheduled_enqueued",
+          "entity_type": "publish_log",
+          "entity_id": "log_due_1",
+          "severity": "info",
+          "message": "Scheduled log moved to pending (due at 2024-11-21T16:00:00Z)"
+        },
+        {
+          "event_type": "publish_scheduled_enqueued",
+          "entity_type": "publish_log",
+          "entity_id": "log_due_2",
+          "severity": "info",
+          "message": "Scheduled log moved to pending (due at 2024-11-21T16:05:00Z)"
+        }
+      ]
+    },
+    {
+      "scenario": "5. Query scheduled logs for a clip",
+      "request": {
+        "method": "GET",
+        "endpoint": "/publishing/schedule/clip_abc123",
+        "body": null
+      },
+      "response": [
+        {
+          "id": "log_789xyz",
+          "clip_id": "clip_abc123",
+          "platform": "instagram",
+          "social_account_id": "acc_instagram_456",
+          "status": "scheduled",
+          "schedule_type": "scheduled",
+          "scheduled_for": "2024-11-21T20:00:00Z",
+          "scheduled_window_end": null,
+          "scheduled_by": "manual",
+          "created_at": "2024-11-21T14:30:00Z",
+          "updated_at": "2024-11-21T14:30:00Z"
+        },
+        {
+          "id": "log_890abc",
+          "clip_id": "clip_abc123",
+          "platform": "tiktok",
+          "social_account_id": "acc_tiktok_123",
+          "status": "scheduled",
+          "schedule_type": "scheduled",
+          "scheduled_for": "2024-11-21T18:30:00Z",
+          "scheduled_window_end": null,
+          "scheduled_by": "campaign_orchestrator",
+          "created_at": "2024-11-21T15:00:00Z",
+          "updated_at": "2024-11-21T15:00:00Z"
+        }
+      ]
+    },
+    {
+      "scenario": "6. TikTok window + 30min gap enforcement",
+      "context": "TikTok window: 16:00-24:00, gap: 30min. Existing post at 18:00, new at 18:15",
+      "existing_logs": [
+        {
+          "id": "log_tiktok_1",
+          "platform": "tiktok",
+          "social_account_id": "acc_tiktok_999",
+          "scheduled_for": "2024-11-21T18:00:00Z",
+          "status": "scheduled"
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "endpoint": "/publishing/schedule",
+        "body": {
+          "clip_id": "clip_tiktok_new",
+          "platform": "tiktok",
+          "social_account_id": "acc_tiktok_999",
+          "scheduled_for": "2024-11-21T18:15:00Z",
+          "scheduled_by": "rule_engine"
+        }
+      },
+      "response": {
+        "publish_log_id": "log_tiktok_adjusted",
+        "status": "scheduled",
+        "reason": "Adjusted from 2024-11-21T18:15:00Z to 2024-11-21T18:30:00Z (30min gap enforcement)",
+        "scheduled_for": "2024-11-21T18:30:00Z",
+        "scheduled_window_end": null
+      },
+      "explanation": "Original time 18:15 violates 30min gap (last post at 18:00). Pushed to 18:30 (18:00 + 30min)."
+    },
+    {
+      "scenario": "7. YouTube outside window - adjusted + gap applied",
+      "context": "YouTube window: 17:00-22:00, gap: 90min. Request at 10:00 (outside window), existing post at 17:00",
+      "existing_logs": [
+        {
+          "id": "log_yt_1",
+          "platform": "youtube",
+          "social_account_id": "acc_yt_123",
+          "scheduled_for": "2024-11-21T17:00:00Z",
+          "status": "scheduled"
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "endpoint": "/publishing/schedule",
+        "body": {
+          "clip_id": "clip_yt_new",
+          "platform": "youtube",
+          "social_account_id": "acc_yt_123",
+          "scheduled_for": "2024-11-21T10:00:00Z",
+          "scheduled_by": "manual"
+        }
+      },
+      "response": {
+        "publish_log_id": "log_yt_double_adjusted",
+        "status": "scheduled",
+        "reason": "Adjusted from 2024-11-21T10:00:00Z to 2024-11-21T18:30:00Z (window adjustment to 17:00, then 90min gap enforcement)",
+        "scheduled_for": "2024-11-21T18:30:00Z",
+        "scheduled_window_end": null
+      },
+      "explanation": "Step 1: 10:00 outside window (17:00-22:00), adjusted to 17:00. Step 2: 17:00 conflicts with existing post at 17:00, pushed to 17:00 + 90min = 18:30."
+    }
+  ],
+  "platform_configuration": {
+    "instagram": {
+      "window": "18:00 - 23:00 UTC",
+      "min_gap": "60 minutes",
+      "rationale": "Best engagement during evening hours"
+    },
+    "tiktok": {
+      "window": "16:00 - 24:00 UTC",
+      "min_gap": "30 minutes",
+      "rationale": "Wide window, frequent posting allowed"
+    },
+    "youtube": {
+      "window": "17:00 - 22:00 UTC",
+      "min_gap": "90 minutes",
+      "rationale": "Premium content, slower cadence"
+    }
+  },
+  "ledger_event_types": {
+    "publish_scheduled_created": {
+      "severity": "info",
+      "description": "Log created with scheduled status"
+    },
+    "publish_scheduled_adjusted": {
+      "severity": "warn",
+      "description": "Time adjusted due to window/gap rules"
+    },
+    "publish_scheduled_enqueued": {
+      "severity": "info",
+      "description": "Scheduled log moved to pending by tick"
+    }
+  },
+  "cron_job_example": {
+    "command": "curl -X POST http://localhost:8000/publishing/scheduler/tick",
+    "schedule": "* * * * *",
+    "description": "Run every minute to process due publications"
+  }
+}

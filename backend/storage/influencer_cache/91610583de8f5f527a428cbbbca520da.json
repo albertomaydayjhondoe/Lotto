@@ -1,0 +1,36 @@
+{
+  "username": "creator2",
+  "platform": "tiktok",
+  "profile_url": "https://www.tiktok.com/@creator2",
+  "metrics": {
+    "followers": 128000,
+    "avg_views": 54000,
+    "avg_likes": 4200,
+    "avg_comments": 180,
+    "avg_shares": 210.0,
+    "total_posts": 245,
+    "posting_frequency": "very_high",
+    "engagement_rate": 0.03421875,
+    "view_to_follower_ratio": 0.421875
+  },
+  "narrative_topics": [
+    "belleza",
+    "lifestyle",
+    "humor"
+  ],
+  "video_styles": [
+    "fast-cut",
+    "trends",
+    "mirror-shots"
+  ],
+  "language": "es",
+  "verified": false,
+  "bio": "Content creator | Beauty & Lifestyle \ud83d\udc84",
+  "last_post_date": "2025-12-10T18:02:24.802572",
+  "cultural_markers": [
+    "latam",
+    "gen-z",
+    "urban"
+  ],
+  "scraped_at": "2025-12-12T18:02:24.802576"
+}

@@ -1,0 +1,43 @@
+{
+  "artist_name": "Stakazo",
+  "additional_notes": "Purple neon trap aesthetic. Focus on urban nighttime cinematography with high contrast and futuristic elements. Official channel maintains strict brand coherence while satellites experiment with viral formats.",
+  "brand_rules_loaded": false,
+  "version": "0.1.0",
+  "style_blocks": {
+    "visual": [
+      "purple_neon_aesthetic",
+      "high_contrast_lighting",
+      "urban_nighttime_scenes",
+      "cyberpunk_elements",
+      "cinematic_camera_work"
+    ],
+    "narrative": [
+      "rise_from_underground",
+      "personal_struggle",
+      "ambition_and_transformation",
+      "urban_solitude",
+      "night_city_stories"
+    ],
+    "fashion": [
+      "dark_hoodies",
+      "leather_jackets",
+      "tech_accessories",
+      "futuristic_masks",
+      "streetwear_premium"
+    ],
+    "camera": [
+      "tracking_shots",
+      "low_angle_power_shots",
+      "slow_motion",
+      "dutch_angles",
+      "close_ups_with_bokeh"
+    ],
+    "editing": [
+      "fast_cuts_on_beat",
+      "glitch_effects",
+      "color_grading_purple_tones",
+      "smooth_transitions",
+      "bass_sync_visual_hits"
+    ]
+  }
+}

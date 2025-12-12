@@ -1,0 +1,212 @@
+name: Dashboard CI
+
+on:
+  push:
+    branches: [ MAIN ]
+    paths:
+      - 'dashboard/**'
+      - '.github/workflows/dashboard-ci.yml'
+  pull_request:
+    branches: [ MAIN ]
+    paths:
+      - 'dashboard/**'
+      - '.github/workflows/dashboard-ci.yml'
+
+jobs:
+  test:
+    name: Test Dashboard
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'dashboard/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: dashboard
+        run: npm ci
+
+      - name: Run linter
+        working-directory: dashboard
+        run: npm run lint
+
+      - name: Run type check
+        working-directory: dashboard
+        run: npx tsc --noEmit
+
+      - name: Run tests
+        working-directory: dashboard
+        run: npm test -- --coverage --watchAll=false --passWithNoTests
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        if: always()
+        with:
+          file: ./dashboard/coverage/coverage-final.json
+          flags: dashboard
+          name: dashboard-coverage
+          fail_ci_if_error: false
+
+      - name: Check test results
+        if: failure()
+        run: |
+          echo "❌ Dashboard tests failed"
+          exit 1
+
+  build:
+    name: Build Dashboard
+    runs-on: ubuntu-latest
+    needs: [test]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'dashboard/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: dashboard
+        run: npm ci
+
+      - name: Build Next.js app
+        working-directory: dashboard
+        env:
+          NEXT_PUBLIC_API_BASE_URL: http://localhost:8000/api
+        run: npm run build
+
+      - name: Check build output
+        working-directory: dashboard
+        run: |
+          if [ -d ".next" ]; then
+            echo "✅ Next.js build successful"
+            ls -lah .next/
+          else
+            echo "❌ Next.js build failed - .next directory not found"
+            exit 1
+          fi
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dashboard-build
+          path: dashboard/.next
+          retention-days: 7
+
+  docker:
+    name: Build Dashboard Docker Image
+    runs-on: ubuntu-latest
+    needs: [test, build]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        working-directory: dashboard
+        run: |
+          docker build -t stakazo-dashboard:ci .
+
+      - name: Test Docker image health
+        run: |
+          # Start container in detached mode
+          docker run -d --name test-dashboard -p 3000:3000 stakazo-dashboard:ci
+          
+          # Wait for container to be ready
+          sleep 10
+          
+          # Test health endpoint
+          curl -f http://localhost:3000/api/health || exit 1
+          
+          # Cleanup
+          docker stop test-dashboard
+          docker rm test-dashboard
+          
+          echo "✅ Dashboard Docker image OK"
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: dashboard
+        run: npm ci
+
+      - name: Run npm audit
+        working-directory: dashboard
+        run: |
+          npm audit --audit-level=moderate
+        continue-on-error: true
+
+      - name: Run Snyk security scan
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high --file=dashboard/package.json
+        if: env.SNYK_TOKEN != ''
+
+  lighthouse:
+    name: Lighthouse CI
+    runs-on: ubuntu-latest
+    needs: [build]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'dashboard/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: dashboard
+        run: npm ci
+
+      - name: Build Next.js app
+        working-directory: dashboard
+        env:
+          NEXT_PUBLIC_API_BASE_URL: http://localhost:8000/api
+        run: npm run build
+
+      - name: Start Next.js server
+        working-directory: dashboard
+        run: |
+          npm run start &
+          npx wait-on http://localhost:3000
+        continue-on-error: true
+
+      - name: Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v10
+        continue-on-error: true
+        with:
+          urls: |
+            http://localhost:3000
+          uploadArtifacts: true
+          temporaryPublicStorage: true

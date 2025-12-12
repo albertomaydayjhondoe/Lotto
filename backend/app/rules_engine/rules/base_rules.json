@@ -1,0 +1,141 @@
+{
+  "version": "1.0.0",
+  "description": "Base rules for Community Manager AI content evaluation and decision making",
+  "rules": [
+    {
+      "id": "check_brand_compliance",
+      "priority": "critical",
+      "if": { "violates_brand": true },
+      "then": { 
+        "action": "reject_content", 
+        "reason": "Brand violation detected",
+        "severity": "high"
+      }
+    },
+    {
+      "id": "prioritize_visual_coherence",
+      "priority": "high",
+      "if": { 
+        "visual_rating": { "gt": 0.7 },
+        "aesthetic_match": { "gt": 0.6 }
+      },
+      "then": { 
+        "priority": "high",
+        "boost_score": 0.2
+      }
+    },
+    {
+      "id": "boost_trending_patterns",
+      "priority": "medium",
+      "if": { 
+        "trend_match": { "gt": 0.5 },
+        "brand_fit": { "gt": 0.7 }
+      },
+      "then": { 
+        "priority": "high",
+        "recommended": true,
+        "boost_score": 0.15
+      }
+    },
+    {
+      "id": "enforce_official_quality_gate",
+      "priority": "critical",
+      "if": {
+        "channel_type": "official",
+        "quality_score": { "lt": 0.8 }
+      },
+      "then": {
+        "action": "reject_content",
+        "reason": "Quality threshold not met for official channel",
+        "severity": "medium"
+      }
+    },
+    {
+      "id": "satellite_experimentation_allowed",
+      "priority": "low",
+      "if": {
+        "channel_type": "satellite"
+      },
+      "then": {
+        "skip_brand_validation": true,
+        "allow_experimentation": true,
+        "track_performance": true
+      }
+    },
+    {
+      "id": "prevent_oversaturation",
+      "priority": "medium",
+      "if": {
+        "posts_today": { "gte": 3 },
+        "channel_type": "official"
+      },
+      "then": {
+        "action": "defer_content",
+        "reason": "Daily post limit reached for official channel",
+        "suggested_time": "tomorrow"
+      }
+    },
+    {
+      "id": "optimize_posting_time",
+      "priority": "medium",
+      "if": {
+        "current_time": { "outside_peak_hours": true }
+      },
+      "then": {
+        "action": "schedule_content",
+        "reason": "Outside peak engagement hours",
+        "suggested_time": "next_peak_window"
+      }
+    },
+    {
+      "id": "detect_high_virality_potential",
+      "priority": "high",
+      "if": {
+        "virality_score": { "gt": 0.85 },
+        "trend_alignment": { "gt": 0.7 }
+      },
+      "then": {
+        "priority": "urgent",
+        "recommended_action": "publish_immediately",
+        "notify_admin": true
+      }
+    },
+    {
+      "id": "enforce_color_palette_compliance",
+      "priority": "high",
+      "if": {
+        "channel_type": "official",
+        "color_palette_match": { "lt": 0.6 }
+      },
+      "then": {
+        "action": "flag_for_review",
+        "reason": "Color palette does not match brand DNA",
+        "severity": "medium"
+      }
+    },
+    {
+      "id": "sentiment_threshold_check",
+      "priority": "medium",
+      "if": {
+        "recent_sentiment": { "lt": -0.3 }
+      },
+      "then": {
+        "action": "adjust_strategy",
+        "reason": "Negative audience sentiment detected",
+        "recommended_action": "increase_positive_content"
+      }
+    }
+  ],
+  "evaluation_order": [
+    "check_brand_compliance",
+    "enforce_official_quality_gate",
+    "satellite_experimentation_allowed",
+    "prevent_oversaturation",
+    "prioritize_visual_coherence",
+    "boost_trending_patterns",
+    "optimize_posting_time",
+    "detect_high_virality_potential",
+    "enforce_color_palette_compliance",
+    "sentiment_threshold_check"
+  ]
+}

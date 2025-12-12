@@ -1,0 +1,50 @@
+account_id,previous_state,new_state,transition_reason,duration_days,risk_snapshot,metrics_snapshot,timestamp
+test_acc_001,CREATED,W1_3,Automatic progression,1,"{'total_risk': 0.1, 'shadowban_risk': 0.05}","{'maturity_score': 0.2, 'total_actions': 5}",2025-12-12T09:44:42.293117
+test_acc_006,,created,Account created,0,{},{},2025-12-12T09:44:42.297182
+test_acc_006,created,w1_3,Automatic progression,1,{},{},2025-12-12T09:44:42.297525
+test_acc_010,,created,Account created,0,{},{},2025-12-12T09:44:42.299294
+test_acc_010,created,w1_3,Progression day 3,3,{},{},2025-12-12T09:44:42.300046
+test_acc_010,w1_3,w1_3,Progression day 6,3,{},{},2025-12-12T09:44:42.301680
+test_acc_010,w1_3,w1_3,Progression day 9,3,{},{},2025-12-12T09:44:42.303011
+test_acc_001,CREATED,W1_3,Automatic progression,1,"{'total_risk': 0.1, 'shadowban_risk': 0.05}","{'maturity_score': 0.2, 'total_actions': 5}",2025-12-12T09:48:28.105167
+test_acc_006,,created,Account created,0,{},{},2025-12-12T09:48:28.108040
+test_acc_006,created,w1_3,Automatic progression,1,{},{},2025-12-12T09:48:28.108218
+test_acc_010,,created,Account created,0,{},{},2025-12-12T09:48:28.109519
+test_acc_010,created,w1_3,Progression day 3,3,{},{},2025-12-12T09:48:28.109682
+test_acc_010,w1_3,w1_3,Progression day 6,3,{},{},2025-12-12T09:48:28.109922
+test_acc_010,w1_3,w1_3,Progression day 9,3,{},{},2025-12-12T09:48:28.110100
+test_acc_001,CREATED,W1_3,Automatic progression,1,"{'total_risk': 0.1, 'shadowban_risk': 0.05}","{'maturity_score': 0.2, 'total_actions': 5}",2025-12-12T09:58:11.997261
+test_acc_006,,created,Account created,0,{},{},2025-12-12T09:58:12.002177
+test_acc_006,created,w1_3,Automatic progression,1,{},{},2025-12-12T09:58:12.002399
+test_acc_010,,created,Account created,0,{},{},2025-12-12T09:58:12.005656
+test_acc_010,created,w1_3,Progression day 3,3,{},{},2025-12-12T09:58:12.005989
+test_acc_010,w1_3,w1_3,Progression day 6,3,{},{},2025-12-12T09:58:12.008173
+test_acc_010,w1_3,w1_3,Progression day 9,3,{},{},2025-12-12T09:58:12.008466
+test_acc_001,CREATED,W1_3,Automatic progression,1,"{'total_risk': 0.1, 'shadowban_risk': 0.05}","{'maturity_score': 0.2, 'total_actions': 5}",2025-12-12T09:59:16.957987
+test_acc_006,,created,Account created,0,{},{},2025-12-12T09:59:16.966970
+test_acc_006,created,w1_3,Automatic progression,1,{},{},2025-12-12T09:59:16.967358
+test_acc_010,,created,Account created,0,{},{},2025-12-12T09:59:16.973157
+test_acc_010,created,w1_3,Progression day 3,3,{},{},2025-12-12T09:59:16.973478
+test_acc_010,w1_3,w1_3,Progression day 6,3,{},{},2025-12-12T09:59:16.973748
+test_acc_010,w1_3,w1_3,Progression day 9,3,{},{},2025-12-12T09:59:16.973967
+test_acc_001,CREATED,W1_3,Automatic progression,1,"{'total_risk': 0.1, 'shadowban_risk': 0.05}","{'maturity_score': 0.2, 'total_actions': 5}",2025-12-12T10:12:20.753342
+test_acc_006,,created,Account created,0,{},{},2025-12-12T10:12:20.767705
+test_acc_006,created,w1_3,Automatic progression,1,{},{},2025-12-12T10:12:20.778485
+test_acc_010,,created,Account created,0,{},{},2025-12-12T10:12:20.788835
+test_acc_010,created,w1_3,Progression day 3,3,{},{},2025-12-12T10:12:20.789136
+test_acc_010,w1_3,w1_3,Progression day 6,3,{},{},2025-12-12T10:12:20.789474
+test_acc_010,w1_3,w1_3,Progression day 9,3,{},{},2025-12-12T10:12:20.789651
+test_acc_001,CREATED,W1_3,Automatic progression,1,"{'total_risk': 0.1, 'shadowban_risk': 0.05}","{'maturity_score': 0.2, 'total_actions': 5}",2025-12-12T10:13:21.797954
+test_acc_006,,created,Account created,0,{},{},2025-12-12T10:13:21.807159
+test_acc_006,created,w1_3,Automatic progression,1,{},{},2025-12-12T10:13:21.807402
+test_acc_010,,created,Account created,0,{},{},2025-12-12T10:13:21.813719
+test_acc_010,created,w1_3,Progression day 3,3,{},{},2025-12-12T10:13:21.814058
+test_acc_010,w1_3,w1_3,Progression day 6,3,{},{},2025-12-12T10:13:21.814466
+test_acc_010,w1_3,w1_3,Progression day 9,3,{},{},2025-12-12T10:13:21.814812
+test_acc_001,CREATED,W1_3,Automatic progression,1,"{'total_risk': 0.1, 'shadowban_risk': 0.05}","{'maturity_score': 0.2, 'total_actions': 5}",2025-12-12T10:13:50.184908
+test_acc_006,,created,Account created,0,{},{},2025-12-12T10:13:50.194133
+test_acc_006,created,w1_3,Automatic progression,1,{},{},2025-12-12T10:13:50.194414
+test_acc_010,,created,Account created,0,{},{},2025-12-12T10:13:50.201446
+test_acc_010,created,w1_3,Progression day 3,3,{},{},2025-12-12T10:13:50.202008
+test_acc_010,w1_3,w1_3,Progression day 6,3,{},{},2025-12-12T10:13:50.202664
+test_acc_010,w1_3,w1_3,Progression day 9,3,{},{},2025-12-12T10:13:50.203366

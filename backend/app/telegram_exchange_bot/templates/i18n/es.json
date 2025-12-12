@@ -1,0 +1,77 @@
+{
+  "announcement_variants": [
+    "🔥 LIKE x LIKE ❤️  SUB x SUB 🔔  COMENT x COMENT 💬\n👉 {link}\n📩 Mándame DM para intercambio 🤝",
+    "🎵 Apoyo mutuo aquí! Intercambio garantizado 🚀\n🎬 Mi canal: {link}\n✅ Responde o escríbeme al privado",
+    "🚀 INTERCAMBIO ACTIVO - 100% Real\n✅ Like + Comment + Sub\n🎯 Video: {link}\n💪 DM abierto para apoyo mutuo",
+    "💥 ¿APOYO MUTUO? Aquí estoy 🤝\n🔊 Escucha mi música: {link}\n📬 Mándame mensaje y coordinamos",
+    "🎶 Like x Like / Sub x Sub / Comment x Comment\n🎥 {link}\n🤙 Hablamos por privado y hacemos intercambio real"
+  ],
+  
+  "dm_intro_variants": [
+    "Hola! Vi tu mensaje en {group_name} 🔥\nAquí mi video 👉 {link}\n¿Apoyas con like + comment + sub? Yo hago lo mismo de inmediato 🤝",
+    "Hey! Del grupo {group_name} 💪\nMi canal: {link}\nIntercambio like x like + sub x sub. ¿Te apuntas? Respondo rápido",
+    "Qué onda! Vi que buscas apoyo en {group_name}\nTe paso mi video: {link}\n¿Hacemos intercambio? Like + comment + sub por lo mismo 🎵",
+    "Hola! Vi tu post en {group_name}\n¿Intercambiamos apoyo? Mi video: {link}\nYo te apoyo primero si quieres 🔥",
+    "Hey! Andas en {group_name} buscando apoyo?\nMira mi música: {link}\n¿Hacemos like x like + sub x sub? 100% real 🤝"
+  ],
+  
+  "dm_followup": [
+    "Ya lo pasé arriba 👆 {link}\nCuando hagas like + comment en mi video, dame tu link y lo hago al toque 💪",
+    "Dale! Apenas hagas like + comment + sub, avisame y yo hago lo tuyo de inmediato 🔥",
+    "El link está arriba 👆\nCuando termines, pasame tu video/post y yo lo apoyo ahora mismo ✅",
+    "Listo! Cuando hagas tu parte dame tu link, que ya lo tengo preparado para apoyar 🚀"
+  ],
+  
+  "dm_request_link": [
+    "Perfecto! Dame tu link y lo hago ahora 🔥",
+    "Dale! Pasame tu video/canal y lo apoyo de una 💪",
+    "Genial! Mandame el link de tu contenido y listo ✅",
+    "Ya está! Pasame tu link que ya estoy listo para apoyar 🚀"
+  ],
+  
+  "dm_confirmation": [
+    "Anotado! Lo hago en los próximos 5 minutos. ¿Querés más apoyo? Tengo 3 cuentas más 😎",
+    "Perfecto! Ya lo tengo agendado. Si necesitas más apoyo tengo cuentas extra disponibles 🔥",
+    "Listo! Lo hago ahora. Por cierto, ¿te interesa apoyo de más cuentas? Puedo ayudar más 💪"
+  ],
+  
+  "dm_thanks": [
+    "🔥 Hecho! Ya apoyé tu contenido. Gracias por el intercambio 🙏🎵",
+    "✅ Listo! Like + comment + sub completados. Éxito con tu canal 🚀",
+    "💪 Ya está! Todo hecho. Gracias por el apoyo mutuo, seguimos en contacto 🤝",
+    "🎵 Terminado! Apoyé todo tu contenido. Cualquier cosa avisame para más intercambios 🔥"
+  ],
+  
+  "dm_offer_extra": [
+    "Si querés más apoyo tengo 3 cuentas más disponibles 😎 ¿Te interesa?",
+    "Tengo cuentas extra si necesitas más likes/subs. ¿Hacemos apoyo masivo? 💥",
+    "Por cierto, manejo varias cuentas. ¿Querés que te apoye desde todas? 🚀"
+  ],
+  
+  "dm_rejection_polite": [
+    "Todo bien! Cualquier cosa si cambias de idea, acá estoy 🤝",
+    "No hay drama! Si después querés, me avisas 💪",
+    "Dale, sin problema! Suerte con tu canal 🎵"
+  ],
+  
+  "defense_role": [
+    "Soy fan de Stakas desde hace rato, solo busco apoyo mutuo para crecer juntos 🤝",
+    "Nada raro, solo intercambio como todos acá. Soy músico también 🎵",
+    "Tranqui, solo quiero crecer mi canal como vos. Apoyo mutuo nada más 💪"
+  ],
+  
+  "keywords_exchange": [
+    "like x like",
+    "sub x sub",
+    "apoyo mutuo",
+    "intercambio",
+    "like por like",
+    "sub por sub",
+    "apoyo musical",
+    "promoción musical",
+    "ayuda mutua",
+    "crecimiento mutuo",
+    "colaboración",
+    "suscripción por suscripción"
+  ]
+}

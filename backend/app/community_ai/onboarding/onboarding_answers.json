@@ -1,0 +1,153 @@
+{
+  "artist_id": "stakazo_001",
+  "artist_name": "Stakazo",
+  "completed_at": "2024-12-07T10:00:00Z",
+  "version": "1.0.0",
+  
+  "visual_identity": {
+    "q1_color_palette": ["#8B44FF", "#0A0A0A", "#1A1A2E", "#16213E", "#E94560"],
+    "q2_forbidden_colors": ["#FFB6C1", "#FFF8DC", "#FFFFE0", "#FFD700", "#FFA07A"],
+    "q3_visual_style": ["oscuro", "futurista", "cyberpunk", "neon", "urbano"],
+    "q4_camera_style": ["tracking_shots", "slow_motion", "close_ups", "dutch_angles", "POV"],
+    "q5_lighting_preference": ["high_contrast", "low_key", "neon_lights", "street_lights", "darkness_with_accents"],
+    "q6_scene_preference": ["ciudad_noche", "estudios_oscuros", "calles_urbanas", "azoteas", "coches", "espacios_minimalistas"],
+    "q7_forbidden_scenes": ["playa", "bosque", "dia_soleado", "ambientes_naturales", "espacios_rusticos"],
+    "q8_editing_style": ["fast_cuts_on_beat", "smooth_transitions", "glitch_effects", "color_grading_cinematic", "time_remapping"],
+    "q9_forbidden_edits": ["edits_genericos", "transiciones_basicas", "efectos_baratos", "slideshows", "exceso_de_texto"],
+    "q10_visual_references": [
+      "Travis Scott - SICKO MODE",
+      "The Weeknd - Blinding Lights",
+      "Blade Runner 2049",
+      "Cyberpunk 2077 game aesthetic",
+      "Ghost in the Shell anime"
+    ]
+  },
+  
+  "brand_tone": {
+    "q11_emotional_tone": ["intensidad", "misterio", "poder", "aspiracion", "energia", "oscuridad", "ambicion"],
+    "q12_forbidden_emotions": ["alegria_superficial", "debilidad", "contenido_generico", "positividad_forzada", "humor_ligero"],
+    "q13_brand_personality": ["auténtico", "introspectivo", "visionario", "implacable", "misterioso"],
+    "q14_artist_uniqueness": "Combino la estética cyberpunk con trap urbano, creando un universo visual único donde el purple neon se convierte en firma. Mi música no es solo sonido, es una experiencia cinematográfica que transporta a la ciudad de noche, donde cada beat es un pulso urbano y cada visual cuenta una historia de ascenso desde las sombras.",
+    "q15_artist_inspirations": [
+      "Travis Scott",
+      "The Weeknd",
+      "Frank Ocean",
+      "Playboi Carti",
+      "Kanye West",
+      "Gesaffelstein",
+      "Daft Punk",
+      "James Blake"
+    ]
+  },
+  
+  "music_context": {
+    "q16_genres": ["trap", "electronic", "experimental", "alternative", "ambient"],
+    "q17_moods": ["dark", "intense", "introspective", "hypnotic", "atmospheric"],
+    "q18_vocal_style": ["autotuned", "melodic", "layered", "experimental"],
+    "q19_lyrical_themes": ["lucha_personal", "ambicion", "ciudad_noche", "soledad", "ascenso", "reflexion", "transformacion"],
+    "q20_forbidden_themes": ["romance_superficial", "contenido_motivacional_cliche", "temas_genericos"]
+  },
+  
+  "fashion_identity": {
+    "q21_wardrobe_style": ["hoodies_oscuros", "leather_jackets", "streetwear_premium", "tech_wear", "minimalist_black", "masks_goggles"],
+    "q22_forbidden_fashion": ["ropa_colorida", "deportiva_generica", "formal_tradicional", "estilo_casual_basico"],
+    "q23_accessories": ["máscaras LED purple", "gafas futuristas", "joyas plateadas mínimas", "tech accessories", "cadenas discretas"],
+    "q24_fashion_aesthetic": ["streetwear", "cyberpunk", "minimalista"]
+  },
+  
+  "narrative_storytelling": {
+    "q25_story_types": ["rise_from_underground", "personal_struggle", "transformation", "urban_solitude", "ambition_journey", "night_city_tales"],
+    "q26_repeatable_themes": ["noche", "ciudad", "ascenso", "transformación", "purple glow", "soledad urbana", "poder interior"],
+    "q27_avoided_narratives": ["historias_genericas", "romance_obvio", "motivacion_cliche", "narrativas_superficiales"],
+    "q28_storytelling_style": ["cinematico", "simbolico", "complejo_layers"]
+  },
+  
+  "official_vs_satellite": {
+    "q29_official_content_types": [
+      "videoclips_oficiales",
+      "teasers_cinematicos",
+      "behind_scenes_premium",
+      "anuncios_lanzamientos",
+      "reels_alta_produccion",
+      "contenido_narrativo"
+    ],
+    "q30_official_forbidden": [
+      "contenido_viral_generico",
+      "trends_sin_coherencia",
+      "edits_rapidos_lowquality",
+      "memes_casuales"
+    ],
+    "q31_satellite_content_types": [
+      "edits_virales",
+      "IA_videos",
+      "clips_series_peliculas",
+      "GTA_edits",
+      "anime_edits",
+      "contenido_experimental",
+      "trends_populares"
+    ],
+    "q32_satellite_rules": [
+      "NO_mostrar_artista_real",
+      "NO_mezclar_estetica_oficial",
+      "NO_usar_vestuario_oficial",
+      "SI_experimentar_libremente",
+      "SI_usar_IA",
+      "SI_contenido_edgy"
+    ],
+    "q33_quality_threshold_official": 8,
+    "q34_quality_threshold_satellite": 5
+  },
+  
+  "audience_targeting": {
+    "q35_target_audience_age": [16, 28],
+    "q36_audience_characteristics": ["urbanos", "fans_trap_electronic", "gamers", "tech_savvy", "nocturnos", "anti_mainstream"],
+    "q37_engagement_drivers": ["estetica_unica", "cinematografia_calidad", "drops_inesperados", "narrative_hooks", "autenticidad"],
+    "q38_content_consumption": ["tiktok", "instagram_reels", "youtube_shorts", "spotify"]
+  },
+  
+  "content_strategy": {
+    "q39_posting_frequency_official": 5,
+    "q40_posting_frequency_satellite": 15,
+    "q41_optimal_posting_times": ["20:00", "21:30", "23:00"],
+    "q42_content_mix": {
+      "videoclips_oficiales": 30,
+      "teasers_previews": 25,
+      "behind_scenes": 15,
+      "reels_narrativos": 20,
+      "stories_aesthetic": 10
+    },
+    "q43_experimentation_tolerance": 7,
+    "q44_trend_adoption_speed": 6
+  },
+  
+  "platform_guidelines": {
+    "q45_instagram_strategy": ["reels_cinematicos", "posts_aesthetic", "stories_diarias"],
+    "q46_tiktok_strategy": ["trends_adaptados", "contenido_original", "behind_scenes"],
+    "q47_youtube_strategy": ["videoclips_oficiales", "shorts_virales", "making_of"]
+  },
+  
+  "metrics_priorities": {
+    "q48_primary_kpis": [
+      "retention_rate",
+      "engagement_rate",
+      "views",
+      "shares",
+      "comments_quality",
+      "follower_growth"
+    ],
+    "q49_success_definition": "Un post exitoso es aquel que mantiene >70% de retention rate, genera conversación auténtica en comments, y logra shares orgánicos. No se trata solo de views, sino de crear conexión real con la audiencia que resuena con la estética y mensaje.",
+    "q50_failure_tolerance": 3
+  },
+  
+  "additional_notes": {
+    "brand_philosophy": "Purple neon aesthetic is not just a color choice - it's a signature that represents the fusion of darkness and light, underground and aspiration, mystery and revelation.",
+    "content_principles": [
+      "Quality over quantity for official channel",
+      "Every visual must tell a story",
+      "Maintain cinematic coherence",
+      "Never compromise aesthetic integrity for trends",
+      "Satellites are for experimentation and learning"
+    ],
+    "long_term_vision": "Build a recognizable universe where fans instantly identify content as Stakazo through visual DNA, creating a cult following based on authentic artistic vision rather than algorithmic trends."
+  }
+}
